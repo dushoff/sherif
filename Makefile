@@ -7,7 +7,7 @@ target pngtarget pdftarget vtarget acrtarget: sherif
 
 # make files
 
-Sources = Makefile 
+Sources = Makefile .gitignore
 
 ##################################################################
 
@@ -31,11 +31,6 @@ $(CPP) $(MAIN):
 
 # JD weird generic stuff
 
-md = ../make/
-rrd = ../RR/
-
-local = default
--include $(md)/local.mk
--include $(md)/$(local).mk
--include $(rrd)/inc.mk
+ms = ../makestuff
+include $(ms)/git.mk
 

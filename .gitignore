@@ -1,0 +1,13 @@
+commit.txt
+.*.sw*
+
+*.pdf
+
+*.log
+*.aux
+.*.aux
+*.blg
+*.bbl
+
+*.Rout
+*.out
