@@ -45,6 +45,7 @@ make_library.Rout: $(libh) $(libcpp) make_library.R lib Makevars
 	R CMD check sherif
 	R CMD INSTALL -l ./lib sherif
 	touch lib/sherif
+	touch $@
 
 ######################################################################
 
@@ -82,7 +83,9 @@ $(libh) $(libcpp):
 
 ms = ../makestuff
 -include $(ms)/git.mk
+-include $(ms)/visual.mk
 -include $(ms)/RR.mk
+-include $(ms)/local.mk
 
 Makefile: ../makestuff
 
