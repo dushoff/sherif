@@ -16,7 +16,7 @@ Sources = Makefile .gitignore
 # CC_FLAGS = -Wall -O3 -std=c++11 -Wno-sign-compare
 
 CC := clang++
-CC_FLAGS := -Wall -O3 -Wno-predefined-identifier-outside-function
+CC_FLAGS := -std=c++11 -Wall -O3 -Wno-predefined-identifier-outside-function
 
 code = mc.cpp simulator.cpp individual.cpp dcTools.cpp RV.cpp globalVar.cpp dcMatrix.cpp EventNumberContainer.cpp 
 # Sources += $(code)
@@ -36,8 +36,8 @@ individual.o: simulator.h EventNumberContainer.h dcTools.h
 simulator.o: individual.h
 
 sim.exe: sim.cpp
-%.exe: %.o $(obj)
-	$(CC) $(CC_FLAGS) $(MAIN) $(CPP) -o $@
+%.exe: %.cpp $(code)
+	$(CC) $(CC_FLAGS) $^ -o $@
 
 ### Temp ###
 $(code):
@@ -47,7 +47,7 @@ $(header):
 	/bin/cp ~/Dropbox/SHERIF/$@ .
 
 sim.cpp:
-	/bin/cp ~/Dropbox/SHERIF/main.cpp .
+	/bin/cp ~/Dropbox/SHERIF/main.cpp $@
 
 Makefile: $(header)
 
@@ -56,5 +56,5 @@ Makefile: $(header)
 # JD git rules
 
 ms = ../makestuff
-include $(ms)/git.mk
+-include $(ms)/git.mk
 
