@@ -50,18 +50,17 @@ make_library.Rout: $(libh) $(libcpp) make_library.R lib Makevars
 
 # NIH_example: Make output file from fake parameters
 
-format_functions = run_sherif_FCT.R format_NIH_FCT.R format_NIH.R
+format_functions = run_sherif_FCT.R loadParam_FCT.R
+format_functions += format_NIH_FCT.R format_NIH.R
 Sources += $(format_functions)
 format_functions.Rout: $(format_functions)
 	$(run-R)
-
-Sources += run_sherif_FCT.R Calibration/loadParam_FCT.R
 
 Sources += NIH_example.R
 Sources += param_model.csv param_simul.csv prediction_date.csv
 
 NIH_example.Rout: lib/sherif
-NIH_example.Rout: format_functions.Rout Calibration/loadParam_FCT.Rout
+NIH_example.Rout: format_functions.Rout loadParam_FCT.Rout
 NIH_example.Rout: param_model.csv param_simul.csv prediction_date.csv
 NIH_example.Rout: NIH_example.R
 	-/bin/rm -rf NIH_example_dir.old
