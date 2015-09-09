@@ -10,7 +10,12 @@ commit.txt
 *.bbl
 
 *.Rout
+*.RR
+*.Rlog
+*.dmp
 *.RData
+
 *.out
+
 
 compiler.mk
