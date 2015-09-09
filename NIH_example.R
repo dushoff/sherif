@@ -36,12 +36,15 @@ proba.cuminc <- seq(0,1, by=0.01)
 prediction.date <- read.table("prediction_date.csv")[1,1]
 bucket.size <- 7
 filesuffix <- "REG_1"
+folder <- "RTARGET_dir"
 
 NIH.format.sherif.output(sim, 
-                         popsize = prm.model$popSize,
-                         proba.inc,
-                         proba.cuminc,
-                         prediction.date,
-                         bucket.size,
-                         filesuffix)
+	popsize = prm.model$popSize,
+	proba.inc,
+	proba.cuminc,
+	prediction.date,
+	bucket.size,
+	filesuffix=filesuffix,
+	folder=folder
+)
 

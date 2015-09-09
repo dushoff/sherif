@@ -15,13 +15,11 @@ save.NIH.format<-function(x,popsize,filename,unscale=TRUE){
   write.csv(df,file = filename)
 }
 
-NIH.format.sherif.output <- function(sim, popsize,
-                                     proba.inc,
-                                     proba.cuminc,
-                                     prediction.date,
-                                     bucket.size,filesuffix,
-                                     folder="NIH_format/"){
-  
+NIH.format.sherif.output <- function(
+	sim, popsize,
+	proba.inc, proba.cuminc, prediction.date,
+	bucket.size,filesuffix, folder
+){
   par(mfrow=c(2,2))
   
   ### Rescale to indiviual units

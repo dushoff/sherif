@@ -1,7 +1,7 @@
 ### Hooks for the editor to set the default target
 current: target
 
-target pngtarget pdftarget vtarget acrtarget: NIH_example.Rout 
+target pngtarget pdftarget vtarget acrtarget: example_plots.Rout.pdf
 
 ##################################################################
 
@@ -33,7 +33,7 @@ lib:
 lib/sherif: make_library.Rout ;
 
 libroot = EventNumberContainer dcTools RV globalVar individual mc dcDataFrame simulator dcMatrix
-libcpp = $(libroot:%=%.cpp)
+libcpp = $(libroot:%=%.cpp) Rwrap_sherif.cpp
 libh = $(libroot:%=%.h)
 Sources += $(libcpp) $(libh)
 
@@ -44,6 +44,7 @@ make_library.Rout: $(libh) $(libcpp) make_library.R lib Makevars
 	R CMD build sherif
 	R CMD check sherif
 	R CMD INSTALL -l ./lib sherif
+	touch lib/sherif
 
 ######################################################################
 
@@ -74,6 +75,7 @@ NIH_example_dir: NIH_example.Rout ;
 
 ### Temporary copying rules ###
 
+files: $(libh) $(libcpp)
 $(libh) $(libcpp):
 	/bin/cp ~/Dropbox/SHERIF/$@ .
 
@@ -82,3 +84,8 @@ $(libh) $(libcpp):
 ms = ../makestuff
 -include $(ms)/git.mk
 -include $(ms)/RR.mk
+
+Makefile: ../makestuff
+
+../makestuff: ../%:
+	cd .. && git clone git@github.com:dushoff/$*.git
