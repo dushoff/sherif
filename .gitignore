@@ -11,3 +11,5 @@ commit.txt
 
 *.Rout
 *.out
+
+compiler.mk
