@@ -1,7 +1,3 @@
-source("run_sherif_FCT.R")
-
-
-
 distrib.output.sherif <- function(sim, varname, 
 								  t, interv.proba, 
 								  timebucket = NULL,

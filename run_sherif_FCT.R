@@ -1,7 +1,3 @@
-library(plyr)
-library(reshape2)
-library(snowfall)
-
 
 run.sherif.parallel <- function(prm.simul, prm.model, ncpus, path.sherif.lib){
 	

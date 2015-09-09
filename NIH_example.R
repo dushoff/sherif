@@ -8,13 +8,13 @@
 ####################################################
 ####################################################
 
-# args <- commandArgs(trailingOnly = TRUE)
-
-t0 <- as.numeric(Sys.time())
+library(plyr)
+library(reshape2)
+library(snowfall)
 
 ### R package for SHERIF is installed locally:
 ###
-path.sherif.lib <- "./Rcpp-sherif/library"
+path.sherif.lib <- "./lib"
 
 library(sherif, lib.loc = path.sherif.lib)
 
@@ -45,20 +45,3 @@ NIH.format.sherif.output(sim,
                          bucket.size,
                          filesuffix)
 
-### PLOTS ###
-if(TRUE){
-  plot.sim.all.mc(sim,"cumIncidence")
-  
-  # Summary across all MC iterations:
-  plot.summarize.sim(sim,varname = "cumIncidence", typ="s")
-  plot.summarize.sim(sim,varname = "incidence", typ="s")
-  plot.summarize.sim(sim,varname = "incidence",timebucket = bucket.size, typ="s")
-  
-  # Summary of the simulation, agregating data in time buckets:
-  sim.summary = as.data.frame(summarize.sim(sim,"cumIncidence",timebucket = NULL))
-  sim.summary = as.data.frame(summarize.sim(sim,"incidence",timebucket =bucket.size))
-  
-  plot.Reff(sim,timebucket=7)
-}
-
-proc.time()

@@ -1157,18 +1157,13 @@ void simulator::calc_WIW(double t)
 
 
 
-
-
-
-
 void simulator::calc_Reff_final()
 {
 	/// Calculate the realized Effective Reproductive number
 	/// It can be calculated only when WIW matrix is updated
 	/// and at horizon of the simulation
 	
-	if (_WIW.size()>0)
-	{
+	if (_WIW.size()>0){
 	 
 		vector<double> n_2nd_cases;
 		vector<double> acq_time;
@@ -1414,6 +1409,40 @@ bool simulator::is_indiv_susceptible(unsigned long ID){
 	    _indiv[idx].get_state()!=sw)
 		res = false;
 
+	return res;
+}
+
+
+vector<double> simulator::get_Reff_final_timeAcq(){
+	
+	/// Returns the vector of disease acquisition time
+	/// of infectors
+	vector<double> res;
+	
+	if(_Reff_final.getNbRows()==0){
+		vector<double> tmp(1,0);
+		res = tmp;
+	}
+	if (_Reff_final.getNbRows()>0) {
+		res = _Reff_final.extractColumn(0);
+	}
+	return res;
+}
+
+
+vector<double> simulator::get_Reff_final_n2ndCases(){
+	
+	/// Returns the vector of secondary cases number
+	/// of infectors
+	vector<double> res;
+	
+	if(_Reff_final.getNbRows()==0){
+		vector<double> tmp(1,0);
+		res = tmp;
+	}
+	if (_Reff_final.getNbRows()>0) {
+		res = _Reff_final.extractColumn(1);
+	}
 	return res;
 }
 

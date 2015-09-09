@@ -25,7 +25,29 @@ Sources += exe.mk
 
 ######################################################################
 
-# Make output file from fake parameters
+# Build the library
+
+lib:
+	mkdir $@
+
+lib/sherif: make_library.Rout ;
+
+libroot = EventNumberContainer dcTools RV globalVar individual mc dcDataFrame simulator dcMatrix
+libcpp = $(libroot:%=%.cpp)
+libh = $(libroot:%=%.h)
+Sources += $(libcpp) $(libh)
+
+make_library.Rout: $(libh) $(libcpp) make_library.R lib Makevars
+	-/bin/rm -rf sherif
+	$(run-R)
+	cp Makevars sherif/src
+	R CMD build sherif
+	R CMD check sherif
+	R CMD INSTALL -l ./lib sherif
+
+######################################################################
+
+# NIH_example: Make output file from fake parameters
 
 format_functions = run_sherif_FCT.R format_NIH_FCT.R format_NIH.R
 Sources += $(format_functions)
@@ -37,6 +59,7 @@ Sources += run_sherif_FCT.R Calibration/loadParam_FCT.R
 Sources += NIH_example.R
 Sources += param_model.csv param_simul.csv prediction_date.csv
 
+NIH_example.Rout: lib/sherif
 NIH_example.Rout: format_functions.Rout Calibration/loadParam_FCT.Rout
 NIH_example.Rout: param_model.csv param_simul.csv prediction_date.csv
 NIH_example.Rout: NIH_example.R
@@ -45,21 +68,14 @@ NIH_example.Rout: NIH_example.R
 	mkdir NIH_example_dir
 	$(run-R)
 
-NIH_example_dir: NIH_example.Rout ; 
+example_plots.Rout: NIH_example.Rout example_plots.R
 
+NIH_example_dir: NIH_example.Rout ; 
 
 ### Temporary copying rules ###
 
-NIH_example.R: ~/Dropbox/SHERIF/run_sherif.R
-	/bin/cp $< $@
-%.R: ~/Dropbox/SHERIF/%.R
-	/bin/cp $< $@
-
-%.csv: ~/Dropbox/SHERIF/%.csv
-	/bin/cp $< $@
-
-Calibration/%.R: ~/Dropbox/SHERIF/Calibration/%.R
-	/bin/cp $< $@
+$(libh) $(libcpp):
+	/bin/cp ~/Dropbox/SHERIF/$@ .
 
 # JD git rules
 
