@@ -35,7 +35,7 @@ lib/sherif: make_library.Rout ;
 libroot = EventNumberContainer dcTools RV globalVar individual mc dcDataFrame simulator dcMatrix
 libcpp = $(libroot:%=%.cpp) Rwrap_sherif.cpp
 libh = $(libroot:%=%.h)
-Sources += $(libcpp) $(libh)
+Sources += make_library.R $(libcpp) $(libh)
 
 make_library.Rout: $(libh) $(libcpp) make_library.R lib Makevars
 	-/bin/rm -rf sherif
