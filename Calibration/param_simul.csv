@@ -1,0 +1,6 @@
+mc_iter,1
+horizon, 300
+timeStepTauLeap, 0.2
+calc_WIW_Re, 0
+seed, 12345
+timeIdxGI, 63
