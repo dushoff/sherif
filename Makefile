@@ -1,7 +1,7 @@
 ### Hooks for the editor to set the default target
 current: target
 
-target pngtarget pdftarget vtarget acrtarget: NIH_example.Rout 
+target pngtarget pdftarget vtarget acrtarget: make_library.Rout 
 
 ##################################################################
 
@@ -41,9 +41,11 @@ libcpp = $(libroot:%=%.cpp) Rwrap_sherif.cpp
 libh = $(libroot:%=%.h)
 Sources += make_library.R $(libcpp) $(libh) Makevars
 
-make_library.Rout: $(libh) $(libcpp) make_library.R lib Makevars
+make_library.Rout: $(libh) $(libcpp) lib Makevars make_library.R
 	-/bin/rm -rf sherif
 	$(run-R)
+
+ex:
 	cp Makevars sherif/src
 	R CMD build sherif
 	R CMD check sherif
@@ -88,6 +90,7 @@ $(libh) $(libcpp):
 -include $(ms)/git.mk
 -include $(ms)/visual.mk
 -include $(ms)/RR.mk
+-include $(ms)/compare.mk
 -include $(ms)/local.mk
 
 Makefile: ../makestuff
