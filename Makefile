@@ -43,7 +43,8 @@ Sources += make_library.R $(libcpp) $(libh) Makevars
 
 make_library.Rout: $(libh) $(libcpp) make_library.R lib Makevars
 	-/bin/rm -rf sherif
-	$(run-R)
+	#$(run-R)
+	Rscript make_library.R
 	cp Makevars sherif/src
 	R CMD build sherif
 	R CMD check sherif
