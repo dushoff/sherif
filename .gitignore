@@ -21,5 +21,6 @@ commit.txt
 *.rd*
 
 NIH_format/*
+lib/*
 
 compiler.mk
