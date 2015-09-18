@@ -44,8 +44,6 @@ Sources += make_library.R $(libcpp) $(libh) Makevars
 make_library.Rout: $(libh) $(libcpp) lib Makevars make_library.R
 	-/bin/rm -rf sherif
 	$(run-R)
-
-ex:
 	cp Makevars sherif/src
 	R CMD build sherif
 	R CMD check sherif
@@ -86,7 +84,6 @@ $(libh) $(libcpp):
 	/bin/cp ~/Dropbox/SHERIF/$@ .
 
 # JD git rules
-
 -include $(ms)/git.mk
 -include $(ms)/visual.mk
 -include $(ms)/RR.mk

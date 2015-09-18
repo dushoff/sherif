@@ -15,8 +15,7 @@ cpp.path <- paste0(cfolder, cfiles)
 # when creating an R package from scrath 
 # with the view of interfacing with C++ (using Rcpp)
 #?Rcpp::Rcpp.package.skeleton
-
-Rcpp.package.skeleton(name =  mypackage,
+Rcpp.package.skeleton(name =  mypackage,example_code = FALSE,
 	author = "David Champredon",
 	cpp_files = cpp.path, 
 	force = TRUE
