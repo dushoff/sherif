@@ -12,7 +12,8 @@ rootnames <- c("EventNumberContainer",
                "mc",
                "dcDataFrame",
                "simulator",
-               "dcMatrix")
+               "dcMatrix",
+               "spatialSim")
 nf <- length(rootnames)
 fullnames <- paste(rootnames,c(rep("h",nf),rep("cpp",nf)),sep=".")
 cppfiles <- c(fullnames, "Rwrap_sherif.cpp")
