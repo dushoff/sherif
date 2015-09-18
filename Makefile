@@ -89,6 +89,7 @@ $(libh) $(libcpp):
 -include $(ms)/visual.mk
 -include $(ms)/RR.mk
 -include $(ms)/local.mk
+-include $(ms)/git.def
 
 Makefile: ../makestuff
 
