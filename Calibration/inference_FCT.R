@@ -43,7 +43,6 @@ inference_LHS <- function(prm2fit.val,
   stopifnot(n.cpu>0)
   if(!is.null(true.prm)) stopifnot(names(prm2fit.val)==names(true.prm))
   
-  
   # Snowfall setup for parallel computing:
   sfInit(parallel = TRUE, cpu = n.cpu)
   sfLibrary(sherif, lib.loc = path.sherif.lib)
@@ -89,6 +88,83 @@ inference_LHS <- function(prm2fit.val,
   }
   return(list(bestfit = max.synlik, alltrials = df ))
 }
+
+
+
+inference_spatial_LHS <- function(prm2fit.val,
+						  n.cpu,
+						  nsim,
+						  path.sherif.lib,
+						  do.plot,
+						  true.prm=NULL){
+	
+	### LATIN HYPERCUBE SAMPLING 
+	### TO FIND MAXIMUM SYNTHETIC LIKELIHOOD
+	### FOR SPATIAL MODEL
+	
+	# Integrity checks:
+	stopifnot(length(prm2fit.val)>0)
+	stopifnot(nsim>4)
+	stopifnot(n.cpu>0)
+	#if(!is.null(true.prm)) stopifnot(names(prm2fit.val)==names(true.prm))
+	
+	# Snowfall setup for parallel computing:
+	sfInit(parallel = TRUE, cpu = n.cpu)
+	sfLibrary(sherif, lib.loc = path.sherif.lib)
+	sfLibrary(synlik)
+	
+	sherif_snowWrap <- function(i){
+
+		### WRAP FOR USE WITH 'SNOWFALL' PACKAGE
+
+		param.i <- as.numeric(prm2fit.val[i,])
+		names(param.i) <- names(prm2fit.val)
+		
+		print(param.i) # <-- DEBUG
+		
+		res <- try(slik(object = sherif_spatial_sl, 
+		                param = param.i, 
+		                multicore = F,  nsim=nsim), 
+		           silent = TRUE)
+		
+		# * * * IMPORTANT NOTE * * * 
+		#
+		# if the synthetic likelihood fails, it is set to 0 (i.e. log lik large negative)
+		# (failure is likely to happen when a summary stat
+		# is NA or constant[:empirical variance=0 => divide by 0 => lik=Inf])
+		if (class(res)=="try-error") res <- -9E99
+		
+		return(res)
+	}
+	
+	idx.apply <- 1:npts.lhs
+	
+	### Parallel execution:
+	sfExportAll()
+	system.time(xx <- sfSapply(idx.apply, sherif_snowWrap))
+	sfStop()
+	
+	### Data frame holding all values computed:
+	df <- cbind(prm2fit.val, synlik = xx)
+	
+	### Maximum synthetic likelihood:
+	max.synlik <- df[which.max(df$synlik),]
+	
+	if(do.plot){
+		np <- length(names(df))
+		pp <- floor(sqrt(np*(np+1)/2))
+		par(mfrow=c(pp,pp))
+		for(i in 1:(np-2)) 
+			for(j in (i+1):(np-1)) 
+				plot.pair.synlik(df,names(df)[i], names(df)[j], max.synlik)
+		for(i in 1:(np-1)) 
+			if(names(df)[i]!="synlik")
+				plot(x=df[,i], y=exp(df$synlik),
+					 pch=16,xlab=names(df)[i],ylab="EXP(synlik)")
+	}
+	return(list(bestfit = max.synlik, alltrials = df ))
+}
+
 
 
 
@@ -143,16 +219,19 @@ diff.from.true <- function(true.prm,max.synlik, rel = TRUE){
 posteriors <- function(df, true.prm=NULL, do.plot=TRUE, prior.range=NULL){
   
   ### Keep only the top [25]% likelihood
-  lik.thresh <- quantile(df$synlik,probs=0.75)
+  #DEBUG
+  print(str(df))
+  print(df)
+  lik.thresh <- quantile(df$synlik,probs=0.75, na.rm = T)
   df <- subset(df, synlik>= lik.thresh)
   
   ### Stats for posterior
-  post.mean <- apply(df, MARGIN = 2,FUN = mean)
-  post.median <- apply(df, MARGIN = 2,FUN = median)
-  q2.5 <-  apply(df, MARGIN = 2,FUN = quantile, probs=0.025)
-  q10 <-  apply(df, MARGIN = 2,FUN = quantile, probs=0.10)
-  q90 <-  apply(df, MARGIN = 2,FUN = quantile, probs=0.90)
-  q97.5 <-  apply(df, MARGIN = 2,FUN = quantile, probs=0.975)
+  post.mean <- apply(df, MARGIN = 2,FUN = mean, na.rm = T)
+  post.median <- apply(df, MARGIN = 2,FUN = median, na.rm = T)
+  q2.5 <-  apply(df, MARGIN = 2,FUN = quantile, probs=0.025, na.rm = T)
+  q10 <-  apply(df, MARGIN = 2,FUN = quantile, probs=0.10, na.rm = T)
+  q90 <-  apply(df, MARGIN = 2,FUN = quantile, probs=0.90, na.rm = T)
+  q97.5 <-  apply(df, MARGIN = 2,FUN = quantile, probs=0.975, na.rm = T)
   
   ### Store everything in a data frame
   res = data.frame(post.mean)

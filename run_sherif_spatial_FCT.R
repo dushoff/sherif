@@ -3,12 +3,15 @@ library(reshape2)
 library(snowfall)
 
 
-run.sherif.parallel <- function(prm.simul, prm.model, ncpus, path.sherif.lib){
+
+
+run.sherif.spatial.parallel <- function(prm.simul, prm.model, prm.spatial,
+                                        ncpus, path.sherif.lib){
 	
 	sfInit(parallel = TRUE, cpu = ncpus)
 	sfLibrary(sherif,lib.loc = path.sherif.lib)
 	
-	snow.wrap.sherif <- function(i){
+	snow.wrap.sherif.spatial <- function(i){
 		prm.simul.i <- prm.simul
 		
 		# make sure the seed is different:
@@ -16,21 +19,29 @@ run.sherif.parallel <- function(prm.simul, prm.model, ncpus, path.sherif.lib){
 		# split the number of MC iterations across all cpus:
 		prm.simul.i[["mc_iter"]] <- ceiling(prm.simul[["mc_iter"]]/ncpus)
 		
-		return(rcpp_sherif(paramsSimul = prm.simul.i, 
-						   paramsModel = prm.model))
+		return(rcpp_sherif_spatial(paramsSimul = prm.simul.i, 
+		                           paramsModel = prm.model,
+		                           paramsSpatial = prm.spatial))
 	}
 	
 	sfExportAll()
-	res <- sfSapply(1:ncpus, snow.wrap.sherif,simplify = F)
+	res <- sfSapply(1:ncpus, snow.wrap.sherif.spatial, simplify = F)
 	sfStop()
+
+	n.locations <- prm.spatial[["nLocations"]]
 	
-	n <- length(res)
-	res2 <- list()
-	for(i in 1:n) {
-		if(i==1) res2<- res[[i]]
-		if(i>1) res2 = mapply(c, res2,res[[i]],SIMPLIFY = F)
+	### Merge the 'ncpus' lists (generated from snowfall's parallel execution) 
+	### into one list that keeps the location structure:
+	res3 <- list()
+	for(loc in 1:n.locations) {
+		res2 <- list()
+		for(i in 1:ncpus){
+			if(i==1) res2<- res[[i]][[loc]]
+			if(i>1) res2 = mapply(c, res2,res[[i]][[loc]],SIMPLIFY = F)
+		}
+		res3[[paste0("location_",loc-1)]] <- res2
 	}
-	return(res2)
+	return(res3)
 }
 
 

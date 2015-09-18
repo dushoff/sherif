@@ -1,3 +1,7 @@
+source("run_sherif_FCT.R")
+
+
+
 distrib.output.sherif <- function(sim, varname, 
 								  t, interv.proba, 
 								  timebucket = NULL,
@@ -25,8 +29,10 @@ distrib.output.sherif <- function(sim, varname,
 		
 		h <- hist(M[,idx.t],breaks = interv.proba,
 				  plot = do.plot,
-				  probability = TRUE, col = "grey",
-				  main = title, xlab="", las=1)
+				  freq = TRUE, col = "grey",
+				  yaxt="n",
+				  main = title, xlab="", ylab="",
+				  las=1)
 		
 		px = h$density*diff(h$breaks)
 		proba.interval <- data.frame(interval=interv.proba, proba=c(px,NA))

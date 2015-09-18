@@ -32,7 +32,8 @@ simulator::simulator(double	beta_IS,
 					 unsigned int nE,
 					 unsigned int nI,
 					 unsigned int nH,
-					 unsigned int nF
+					 unsigned int nF,
+					 unsigned long firstID
 )
 {
 	/// Constructs a simulator object
@@ -72,7 +73,7 @@ simulator::simulator(double	beta_IS,
 	
 	for(unsigned long i=0; i<popSize; i++)	{
 		_indiv[i].create();
-		_indiv[i].set_ID(i);
+		_indiv[i].set_ID(firstID+i);
 	}
 }
 
@@ -96,7 +97,7 @@ void simulator::displayPopulation(bool indivDetails){
 	if(indivDetails){
 		cout << "ID\t" << "state" <<endl;
 		coutline(40);
-		for(int i=0; i<_popSize; i++){
+		for(int i=0; i<_indiv.size(); i++){
 			cout<< _indiv[i].get_ID()<<"\t"<<_indiv[i].get_state()<<endl;
 		}
 	}
@@ -165,15 +166,16 @@ unsigned long simulator::findIndivIdx(unsigned long ID){
 	/// Finds the index position of a given individual ID
 	/// in the vector of individuals of the simulation '_indiv'
 	
-	unsigned long res = _popSize;
-	for (unsigned long i=0; i<_popSize; i++) {
+	unsigned long res = 9E9;
+	
+	for (unsigned long i=0; i<_indiv.size(); i++) {
 		if (_indiv[i].get_ID()==ID) {
 			res = i;
 			break;
 		}
 	}
 	string errmsg = "ID "+to_string(ID)+ " not found!";
-	stopif(res==_popSize,errmsg);
+	stopif(res== 9E9,errmsg);
 	return res;
 }
 
@@ -192,14 +194,14 @@ double simulator::eventRate_infection_S_by_I(){
 	/// Infection rate on susceptible by infectious, all in general pop
 	
 	double t = _currentTime;
-	return _beta_IS_fct(t)*_count_I*_count_S/_popSize;
+	return _beta_IS_fct(t)*_count_I*_count_S/_indiv.size();
 }
 
 double simulator::eventRate_infection_S_by_Iw(){
 	/// Infection rate on susceptible by infectious HCW
 	
 	double t = _currentTime;
-	return _beta_IwS_fct(t)*_count_Iw*_count_S/_popSize;
+	return _beta_IwS_fct(t)*_count_Iw*_count_S/_indiv.size();
 }
 
 
@@ -207,7 +209,7 @@ double simulator::eventRate_infection_S_by_F(){
 	/// Infection rate on susceptible by funeral ceremonies
 	
 	double t = _currentTime;
-	return _beta_FS_fct(t)*_count_F*_count_S/_popSize;
+	return _beta_FS_fct(t)*_count_F*_count_S/_indiv.size();
 }
 
 
@@ -215,14 +217,14 @@ double simulator::eventRate_infection_Sw_by_I(){
 	/// Infection rate on susceptible by infectious, all in general pop
 	
 	double t = _currentTime;
-	return _beta_ISw_fct(t)*_count_I*_count_Sw/_popSize;
+	return _beta_ISw_fct(t)*_count_I*_count_Sw/_indiv.size();
 }
 
 double simulator::eventRate_infection_Sw_by_Iw(){
 	/// Infection rate on susceptible by infectious, all in general pop
 	
 	double t = _currentTime;
-	return _beta_IwSw_fct(t)*_count_Iw*_count_Sw/_popSize;
+	return _beta_IwSw_fct(t)*_count_Iw*_count_Sw/_indiv.size();
 }
 
 
@@ -230,7 +232,7 @@ double simulator::eventRate_infection_Sw_by_F(){
 	/// Infection rate on susceptible by infectious, all in general pop
 	
 	double t = _currentTime;
-	return _beta_FSw_fct(t)*_count_F*_count_Sw/_popSize;
+	return _beta_FSw_fct(t)*_count_F*_count_Sw/_indiv.size();
 }
 
 
@@ -238,7 +240,7 @@ double simulator::eventRate_infection_Sw_by_H(){
 	/// Infection rate on susceptible by infectious, all in general pop
 	
 	double t = _currentTime;
-	return _beta_HSw_fct(t)*_count_H*_count_Sw/_popSize;
+	return _beta_HSw_fct(t)*_count_H*_count_Sw/_indiv.size();
 }
 
 
@@ -508,7 +510,7 @@ void simulator::clean_start()
 	_GIbck.clear();
 	_GIbck_times.clear();
 
-	for(int i=0;i<_popSize; i++) _indiv[i].create();
+	for(int i=0;i<_indiv.size(); i++) _indiv[i].create();
 }
 
 
@@ -585,7 +587,7 @@ void simulator::initialize(unsigned long initI,
 	_incidence.push_back(initI);
 	_incidence_hcw.push_back(initIw);
 	
-	_prevalence.push_back(initI+initIw);
+	update_prevalence(); //_prevalence.push_back(initI+initIw);
 	
 	_count_S_vec.push_back(_count_S);
 	_count_Sw_vec.push_back(_count_Sw);
@@ -600,6 +602,10 @@ void simulator::initialize(unsigned long initI,
 	
 	_count_events_sim = 0;
 	_count_events_sim_ignored = 0;
+	
+	_time_firstCase = -9E9; // no case is translated with a negative time
+	if (_count_E+_count_Ew+_count_I+_count_Iw>0) _time_firstCase = 0.0;
+	
 }
 
 
@@ -631,6 +637,13 @@ void simulator::update_table_state_ID(unsigned long ID,
 	_table_state_ID[prevState] = popElementValue(_table_state_ID[prevState], ID);
 	// Add ID to next state vector:
 	_table_state_ID[nextState].push_back(ID);
+}
+
+
+void simulator::update_time_firstCase(double t){
+	/// Update the time of first case
+	if (_time_firstCase<0 && (_count_E+_count_Ew+_count_I+_count_Iw>0))
+		_time_firstCase = t;
 }
 
 
@@ -1097,9 +1110,10 @@ void simulator::run_tauLeap(double horizon,
 		if(fabs(t-tt)<0.0001) {
 			update_GIbck(t);
 		}
-
+		
+		
 		update_incidences();
-		_prevalence.push_back(_count_I+_count_Iw+_count_H);  // update prevalence time series
+		update_prevalence(); // delete: _prevalence.push_back(_count_I+_count_Iw+_count_H);  // update prevalence time series
 		update_all_count_vec();   // update counts time series
 		
 		// update times
@@ -1136,13 +1150,13 @@ void simulator::calc_WIW(double t)
 {
 	/// Calculate matrix of 'Who Infected Who' at different time points
 	
-	Matrix M(_popSize,_popSize);
+	Matrix M(_indiv.size(),_indiv.size());
 	M.setAllValues(0.0);
 	
 	unsigned int s	= getState_S();
 	unsigned int sw	= getState_Sw();
 	
-	for(int j=0; j<_popSize; j++){
+	for(int j=0; j<_indiv.size(); j++){
 		// only individuals already infected:
 		if (_indiv[j].get_state()!= s &&
 			_indiv[j].get_state()!= sw){
@@ -1168,7 +1182,7 @@ void simulator::calc_Reff_final()
 		vector<double> n_2nd_cases;
 		vector<double> acq_time;
 	 
-		for (unsigned long i=0; i<_popSize; i++){
+		for (unsigned long i=0; i<_indiv.size(); i++){
 		 if (!is_indiv_susceptible(i))
 		 {
 			 // counts the number of infectees for everyone
@@ -1195,8 +1209,8 @@ void simulator::update_GIbck(double t){
 	vector<double> timeAcqInfectee;
 	
 	// Scan the all infected individuals
-	for (unsigned long i=0; i<_popSize; i++){
-		if (!is_indiv_susceptible(i)){
+	for (unsigned long i=0; i<_indiv.size(); i++){
+		if (!is_indiv_susceptible(_indiv[i].get_ID())){
 			double ta = _indiv[i].get_timeDiseaseAcquisition();
 			if(ta>0){
 				gi.push_back(_indiv[i].get_GIbck());
@@ -1232,7 +1246,7 @@ bool simulator::at_least_one_S_and_I_or_F_or_Iw(){
 	unsigned int state_Fmin		= getState_F(1);
 	unsigned int state_Fmax		= getState_F(_nF);
 	
-	for(int i=0;i<_popSize; i++){
+	for(int i=0;i<_indiv.size(); i++){
 		unsigned int istatus = _indiv[i].get_state();
 		
 		if (istatus==state_S) res_S = true;
@@ -1251,7 +1265,7 @@ bool simulator::at_least_one_S_and_I_or_F_or_Iw(){
 bool simulator::all_in_R_or_D(){
 	/// Are all individuals in either R or D compartments?
 	
-	return (_count_D+_count_R == _popSize);
+	return (_count_D+_count_R == _indiv.size());
 }
 
 
@@ -1314,7 +1328,7 @@ unsigned long simulator::census_state(unsigned int a, unsigned int b)
 	
 	unsigned long cnt = 0;
 	
-	for(int i=0;i<_popSize; i++){
+	for(int i=0;i<_indiv.size(); i++){
 		unsigned int istatus = _indiv[i].get_state();
 		if (istatus>=a && istatus<=b) cnt++;
 	}
@@ -1329,7 +1343,7 @@ unsigned long simulator::census_state(unsigned int a)
 	
 	unsigned long cnt = 0;
 	
-	for(int i=0;i<_popSize; i++){
+	for(int i=0;i<_indiv.size(); i++){
 		if (_indiv[i].get_state()==a) cnt++;
 	}
 	return cnt;
@@ -1343,7 +1357,7 @@ vector<unsigned long> simulator::census_ID(unsigned int a)
 	
 	vector<unsigned long> res;
 	
-	for(int i=0;i<_popSize; i++){
+	for(int i=0;i<_indiv.size(); i++){
 		if (_indiv[i].get_state()==a)
 			res.push_back(_indiv[i].get_ID());
 	}
@@ -1359,7 +1373,7 @@ vector<unsigned long> simulator::census_ID(unsigned int a, unsigned int b)
 	
 	vector<unsigned long> res;
 	
-	for(int i=0;i<_popSize; i++){
+	for(int i=0;i<_indiv.size(); i++){
 		if (_indiv[i].get_state()>=a && _indiv[i].get_state()<=b)
 			res.push_back(_indiv[i].get_ID());
 	}
@@ -1411,6 +1425,82 @@ bool simulator::is_indiv_susceptible(unsigned long ID){
 
 	return res;
 }
+
+
+void	simulator::add_indiv(unsigned long ID,
+							 unsigned int state,
+							 bool isHCW,
+							 double timeDiseaseAcquisition,
+							 unsigned long infectorID,
+							 double GIbck,
+							 vector<double> GIfwd){
+
+	/// Add a new individual to the population
+	/// (typically coming from migrations)
+
+	
+	individual tmp;
+	tmp.set_state(state);
+	tmp.set_isHCW(isHCW);
+	tmp.set_timeDiseaseAcquisition(timeDiseaseAcquisition);
+	tmp.set_GIbck(GIbck);
+	tmp.set_GIfwd(GIfwd);
+	tmp.set_infectorID(infectorID);
+	tmp.set_ID(ID);
+	
+	_indiv.push_back(tmp);
+
+	// update simulator following individual addition:
+	_popSize++;
+	_table_state_ID[state].push_back(ID);
+	// counts:
+	bool found = false;
+	if (state == getState_S()) {_count_S++; found = true;}
+	if (state == getState_Sw()) {_count_Sw++; found = true;}
+	if (getState_E(1)<=state && state <= getState_E(_nE)) {_count_E++; found = true;}
+	if (getState_Ew(1)<=state && state <= getState_Ew(_nE)) {_count_Ew++; found = true;}
+	if (getState_I(1)<=state && state <= getState_I(_nI)) {_count_I++; found = true;}
+	if (getState_Iw(1)<=state && state <= getState_Iw(_nI)) {_count_Iw++; found = true;}
+	stopif(!found, "individual's state not implemented!");
+	
+}
+
+void simulator::add_indiv(individual indiv){
+	/// Add a new individual to the population
+	
+	add_indiv(indiv.get_ID(),
+			  indiv.get_state(),
+			  indiv.get_isHCW(),
+			  indiv.get_timeDiseaseAcquisition(),
+			  indiv.get_infectorID(),
+			  indiv.get_GIbck(),
+			  indiv.get_GIfwd());
+}
+
+
+void simulator::remove_indiv(unsigned long ID){
+	
+	/// Remove individual 'ID' from the population
+	
+	unsigned long ii = findIndivIdx(ID);
+	unsigned int state = _indiv[ii].get_state();
+	
+	_table_state_ID[state] = popElementValue(_table_state_ID[state], ID);
+	_indiv.erase(_indiv.begin()+ii);
+	_popSize --;
+	
+	// counts:
+	bool found = false;
+	if (state == getState_S()) {_count_S--; found = true;}
+	if (state == getState_Sw()) {_count_Sw--; found = true;}
+	if (getState_E(1)<=state && state <= getState_E(_nE)) {_count_E--; found = true;}
+	if (getState_Ew(1)<=state && state <= getState_Ew(_nE)) {_count_Ew--; found = true;}
+	if (getState_I(1)<=state && state <= getState_I(_nI)) {_count_I--; found = true;}
+	if (getState_Iw(1)<=state && state <= getState_Iw(_nI)) {_count_Iw--; found = true;}
+	stopif(!found, "individual's state not implemented!");
+	
+}
+
 
 
 vector<double> simulator::get_Reff_final_timeAcq(){
@@ -1518,7 +1608,7 @@ unsigned long simulator::census_hcw(){
 	/// counts all HCW
 	
 	unsigned long sum = 0;
-	for(int i=0; i<_popSize; i++) if(_indiv[i].get_isHCW()) sum++;
+	for(int i=0; i<_indiv.size(); i++) if(_indiv[i].get_isHCW()) sum++;
 	return sum;
 }
 
@@ -1553,7 +1643,7 @@ void simulator::save_GIbck(string filename){
 
 	ofstream f(filename);
 	
-	for (int i=0; i<_popSize;  i++){
+	for (int i=0; i<_indiv.size();  i++){
 		double tmp = _indiv[i].get_timeDiseaseAcquisition();
 		
 		if(tmp>0){

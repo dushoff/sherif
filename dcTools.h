@@ -264,7 +264,7 @@ template <class T> T sumElements(vector<T> x)
 
 template <class T> T extractElementRandom(vector<T> x)
 {
-	// Extracts an element randomly
+	/// Extracts an element randomly
 	int rndPos = uniformInt(0, x.size()-1);
 	
 	return x[rndPos];
@@ -570,7 +570,7 @@ Matrix	LatinHypercubeSampling(vector<double> Vmin, vector<double> Vmax,
 
 vector<int> uniformIntVector(int seed, int size, int min, int max); // Vector of size "size", elements randomly valued with uniform distribution
 vector<long> uniformIntVectorUnique(long size, long min, long max); // Vector of size "size", elements randomly valued with uniform distribution. Cannot have duplicate elements
-
+vector<unsigned long> uniformIntVectorUnique(unsigned long size, unsigned long min,unsigned long max);
 
 
 

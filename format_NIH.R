@@ -6,6 +6,8 @@
 ###
 ####################################################################
 
+source("format_NIH_FCT.R")
+
 
 
 
@@ -15,11 +17,13 @@ save.NIH.format<-function(x,popsize,filename,unscale=TRUE){
   write.csv(df,file = filename)
 }
 
-NIH.format.sherif.output <- function(
-	sim, popsize,
-	proba.inc, proba.cuminc, prediction.date,
-	bucket.size,filesuffix, folder
-){
+NIH.format.sherif.output <- function(sim, popsize,
+                                     proba.inc,
+                                     proba.cuminc,
+                                     prediction.date,
+                                     bucket.size,filesuffix,
+                                     folder="NIH_format/"){
+  
   par(mfrow=c(2,2))
   
   ### Rescale to indiviual units

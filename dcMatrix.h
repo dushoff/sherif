@@ -57,7 +57,10 @@ public:
     Matrix(string pathFile);
 	
 	Matrix(vector<double> v);	// Matrix (n,1) from a single vector(n)
-	
+
+	Matrix(vector<double> v,
+		   unsigned long ncol,
+		   unsigned long nrow);
 	
     
     void    resize(unsigned long n)  
@@ -87,6 +90,8 @@ public:
 	void    WriteToFileCSV(string);
 	void    WriteToFileCSV(string fileName, vector<string> header);
 	
+	
+	vector<double> melt() {return val;}
 	
     // Operations on embedded vectors
     vector<double>  extractColumn(unsigned long j_col);
