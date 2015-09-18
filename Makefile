@@ -9,9 +9,9 @@ target pngtarget pdftarget vtarget acrtarget: NIH_example.Rout
 
 Sources = Makefile .gitignore 
 
-ms = ../makestuff
+#ms = ../makestuff
 
-include $(ms)/git.def
+#include $(ms)/git.def
 
 ##################################################################
 
@@ -84,7 +84,7 @@ $(libh) $(libcpp):
 	/bin/cp ~/Dropbox/SHERIF/$@ .
 
 # JD git rules
-
+- ms = ../makestuff
 -include $(ms)/git.mk
 -include $(ms)/visual.mk
 -include $(ms)/RR.mk
