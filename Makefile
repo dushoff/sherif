@@ -9,6 +9,10 @@ target pngtarget pdftarget vtarget acrtarget: NIH_example.Rout
 
 Sources = Makefile .gitignore 
 
+ms = ../makestuff
+
+include $(ms)/git.def
+
 ##################################################################
 
 # compiler.mk is intended to be a local file; it uses clang by default, but you can just edit and save it on any particular machine. Don't add it to sources
@@ -81,7 +85,6 @@ $(libh) $(libcpp):
 
 # JD git rules
 
-ms = ../makestuff
 -include $(ms)/git.mk
 -include $(ms)/visual.mk
 -include $(ms)/RR.mk
