@@ -83,6 +83,11 @@ initLocations.csv nLocations.csv param_model.csv param_simul.csv popLocations.cs
 	-mkdir NIH_format
 	Rscript $< > $@ &
 
+spatial_test.Rout: NIH_format
+
+NIH_format:
+	mkdir $@
+
 Sources += spatial_test.R
 spatial_test.Rout: format_NIH.Rout run_sherif_spatial_FCT.Rout Calibration/loadParam_FCT.Rout spatial_test.R
 spatial_test.Rout: run_sherif_spatial.R
