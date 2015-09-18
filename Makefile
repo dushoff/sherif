@@ -1,7 +1,7 @@
 ### Hooks for the editor to set the default target
 current: target
 
-target pngtarget pdftarget vtarget acrtarget: make_library.Rout 
+target pngtarget pdftarget vtarget acrtarget: run_sherif_spatial.Rout 
 
 ##################################################################
 
@@ -82,6 +82,11 @@ simple_run.out: run_sherif_spatial.R run_sherif_spatial_FCT.R distLocations.csv 
 initLocations.csv nLocations.csv param_model.csv param_simul.csv popLocations.csv prediction_date.csv
 	-mkdir NIH_format
 	Rscript $< > $@ &
+
+Sources += run_sherif_spatial.R
+run_sherif_spatial.Rout: format_NIH.Rout run_sherif_spatial_FCT.Rout Calibration/loadParam_FCT.Rout
+run_sherif_spatial.Rout: run_sherif_spatial.R
+	$(run-R)
 
 ### Temporary copying rules ###
 
