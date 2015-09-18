@@ -78,6 +78,13 @@ example_plots.Rout: NIH_example.Rout example_plots.R
 
 NIH_example_dir: NIH_example.Rout ; 
 
+# DC's rules:
+simple_run.out: run_sherif_spatial.R run_sherif_spatial_FCT.R distLocations.csv gravity_cst.csv \
+initLocations.csv nLocations.csv param_model.csv param_simul.csv popLocations.csv prediction_date.csv
+	-mkdir NIH_format
+	Rscript $< > $@ &
+
+
 ### Temporary copying rules ###
 
 files: $(libh) $(libcpp)
