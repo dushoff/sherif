@@ -50,8 +50,8 @@ update.param <- function(param, paramsModel, tag){
 	### (e.g. contact rates for each location)
 	
 	# identify parameters that are element of a vector
-	# (for now, only spatial related, so look for "loc" string)
-	tag <- "_loc"
+	# by looking for "_vec" string
+	tag <- "_vec"
 	idxvec <- grepl(pattern = tag, x = names(param))
 	
 	# overides scalar (non-vector) parameter values 
@@ -61,11 +61,11 @@ update.param <- function(param, paramsModel, tag){
 	if(sum(idxvec)>0){
 		# deal with vector elements (a bit more fidly)
 		vecname <- 	names(param)[idxvec]
-		pos <- as.integer(gregexpr(pattern = "_loc",vecname))
+		pos <- as.integer(gregexpr(pattern = tag,vecname))
 		vecname2 <- substr(vecname,start=1,stop = pos-1)
 		# element number in the vector
-		elemnum <- as.integer(substr(vecname,start=pos+nchar(tag),stop = pos+nchar(tag)))
-		
+		elemnum <- as.integer(substr(vecname,start=pos+nchar(tag),
+									 stop = pos+nchar(tag)))
 		# Replace the parameter value of the vector element:
 		for(i in 1:length(vecname2)){
 			vn <- vecname2[i]
@@ -78,10 +78,8 @@ update.param <- function(param, paramsModel, tag){
 
 get.param <- function(paramNames, paramsModel, tag){
 	
-	
 	res <- vector()
 	k = 1
-	tag <- "_loc"
 	idxvec <- grepl(pattern = tag, x = paramNames)
 	
 	# overides scalar (non-vector) parameter values 
@@ -95,7 +93,7 @@ get.param <- function(paramNames, paramsModel, tag){
 	if(sum(idxvec)>0){
 		# deal with vector elements (a bit more fidly)
 		vecname <- 	paramNames[idxvec]
-		pos <- as.integer(gregexpr(pattern = "_loc",vecname))
+		pos <- as.integer(gregexpr(pattern = tag,vecname))
 		vecname2 <- substr(vecname,start=1,stop = pos-1)
 		# element number in the vector
 		elemnum <- as.integer(substr(vecname,start=pos+nchar(tag),stop = pos+nchar(tag)))
@@ -122,38 +120,9 @@ sherif_spatial_wrap <- function(param, nsim, extraArgs, ...){
 	paramsModel <- extraArgs[["paramsModel"]]
 	paramsSimul <- extraArgs[["paramsSimul"]]
 	paramsSpatial <- extraArgs[["paramsSpatial"]]
-	
-	# 	### 'param' = model parameters to be calibrated
-	# 	### so must override model parameter given in 'paramsModel'
-	# 	###
-	# 	### But need special treatment for parameters in vector format
-	# 	### (e.g. contact rates for each location)
-	# 	
-	# 	# identify parameters that are element of a vector
-	# 	# (for now, only spatial related, so look for "loc" string)
-	# 	tag <- "_loc"
-	# 	idxvec <- grepl(pattern = tag, x = names(param))
-	# 	
-	# 	# overides scalar (non-vector) parameter values 
-	# 	scalarname <- names(param)[!idxvec]
-	# 	for(nn in scalarname) paramsModel[nn] <- param[nn]
-	# 	
-	# 	# deal with vector elements (a bit more fidly)
-	# 	vecname <- 	names(param)[idxvec]
-	# 	pos <- as.integer(gregexpr(pattern = "_loc",vecname))
-	# 	vecname2 <- substr(vecname,start=1,stop = pos-1)
-	# 	# element number in the vector
-	# 	elemnum <- as.integer(substr(vecname,start=pos+nchar(tag),stop = pos+nchar(tag)))
-	# 	
-	# 	# Replace the parameter value of the vector element:
-	# 	for(i in 1:length(vecname2)){
-	# 		vn <- vecname2[i]
-	# 		paramsModel[vn][[1]][elemnum[i]] <- param[vecname[i]]
-	# 	}
-	
 	paramsModel <- update.param(param = param,
 								paramsModel = paramsModel,
-								tag="_loc")
+								tag="_vec")
 	
 	
 	# Overrides mc_iter by nsim
@@ -169,9 +138,11 @@ sherif_spatial_wrap <- function(param, nsim, extraArgs, ...){
 	#
 	# - location_0 ---- ts      (dataframe of time series)
 	#               |__ GIbck   (dataframe of generation interval)
+	#				|__ ...
 	#
 	# - location_1 ---- ts
 	#               |__ GIbck
+	#				|__ ...
 	#
 	# etc.
 	
@@ -184,6 +155,8 @@ sherif_spatial_wrap <- function(param, nsim, extraArgs, ...){
 		ts <- list()
 		# Generation intervals
 		GIbck <- list()
+		# time first case
+		time_firstCase <- list()
 		
 		for(i in 1:nsim){
 			df <- data.frame(time= sim[[loc]]$time[[i]],
@@ -193,8 +166,13 @@ sherif_spatial_wrap <- function(param, nsim, extraArgs, ...){
 							 deathsCum_hcw= sim[[loc]]$deathsCum_hcw[[i]])
 			ts[[i]] <- df
 			GIbck[[i]] <- sim[[loc]]$GIbck_gi[[i]]
+			time_firstCase[[i]] <- sim[[loc]]$time_firstCase[[i]]
+			# DEBUG
+			#print(paste(loc,i,"DEBUG WRAP::",time_firstCase[[i]]))
 		}
-		locations[[loc]] <- list(ts=ts, GIbck=GIbck)
+		locations[[loc]] <- list(ts=ts, 
+								 GIbck=GIbck, 
+								 time_firstCase=time_firstCase)
 		names(locations)[loc] <- paste0("location_",loc-1)
 	}
 	return(locations)

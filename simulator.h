@@ -14,8 +14,12 @@
 #include "EventNumberContainer.h"
 #include "globalVar.h"
 
+
+
 class simulator
 {
+	friend class spatialSim;
+	
 	vector<individual>	_indiv;
 
 	
@@ -115,7 +119,7 @@ class simulator
 	vector<unsigned long>	_fatalCum_genPop_vec;
 	vector<unsigned long>	_fatalCum_hcw_vec;
 	
-
+	double					_time_firstCase;	// time of first case (relevant only when importation activated)
 
 	unsigned long		findIndivIdx(unsigned long ID);
 	
@@ -179,10 +183,6 @@ class simulator
 	void			update_GIbck(double t);
 	
 	// Simulation functions:
-
-	void			initialize(unsigned long initSw,
-							   unsigned long initIw,
-							   unsigned long initI);
 	
 	void			initialize_table_state_ID();
 	void			update_table_state_ID(unsigned long ID,
@@ -257,10 +257,12 @@ class simulator
 	
 	void			update_all_count_vec();
 	void			update_incidences();
+	void			update_prevalence() {_prevalence.push_back(_count_E+_count_Ew+_count_I+_count_Iw+_count_H);}
 	
 	void			check_popSize();
 	void			check_popSize_I();
 	
+	void			update_time_firstCase(double t);
 
 	
 public:
@@ -290,12 +292,18 @@ public:
 			  unsigned int nE,
 			  unsigned int nI,
 			  unsigned int nH,
-			  unsigned int nF);
+			  unsigned int nF,
+			  unsigned long firstID);
 	
 	
-	
+	void	initialize(unsigned long initSw,
+					   unsigned long initIw,
+					   unsigned long initI);
 	
 	// ===== GET FUNCTIONS =====
+	
+	individual				get_individual(unsigned long i) {return _indiv[i];}
+	individual				get_individual_ID(unsigned long ID) {unsigned long ii = findIndivIdx(ID); return _indiv[ii];}
 	
 	unsigned long			get_popSize(){return _popSize;}
 	
@@ -321,6 +329,23 @@ public:
 	Matrix					get_Reff_final() {return _Reff_final;}
 	vector<double>			get_Reff_final_timeAcq(); 
 	vector<double>			get_Reff_final_n2ndCases();
+	
+	double					get_time_firstCase() {return _time_firstCase;}
+	
+	// ===== Functions associated with individuals =====
+	
+	void	add_indiv(unsigned long ID,
+					  unsigned int state,
+					  bool isHCW,
+					  double timeDiseaseAcquisition,
+					  unsigned long infectorID,
+					  double GIbck,
+					  vector<double> GIfwd);
+	
+	void	add_indiv(individual indiv);
+	
+	void	remove_indiv(unsigned long ID);
+	
 	
 	// ===== Simulation FUNCTIONS =====
 	

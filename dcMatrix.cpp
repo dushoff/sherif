@@ -43,6 +43,15 @@ Matrix::Matrix(vector<double> v)
 	}
 }
 
+Matrix::Matrix(vector<double> v,
+			   unsigned long ncol,
+			   unsigned long nrow){
+	/// Build a matrixfrom a long-format vector
+	nbCols = ncol;
+	nbRows = nrow;
+	val = v;
+}
+
 
 // ////////////////////////////////////////////////////////////////////
 //              OPERATORS
@@ -54,8 +63,8 @@ double & Matrix::operator () (unsigned long i,unsigned long j)
 	/// top left element is M(0,0)
 	/// bottom right element is M(n-1,m-1)
 	
-    assert(i>=0);assert(i<nbRows);
-    assert(j>=0);assert(j<nbCols);
+	if(i>=nbRows) {cout<<"ERROR: Matrix row requested is too large (i="<<i<<"; nbRows="<<nbRows<<")"<<endl; exit(1);}
+	if(j>=nbCols) {cout<<"ERROR: Matrix column requested is too large (j="<<j<<"; nbCols="<<nbCols<<")"<<endl; exit(1);}
     
     return val[nbCols*i+j];
 }

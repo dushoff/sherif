@@ -13,7 +13,7 @@
 #include <Rcpp.h>
 using namespace Rcpp;
 
-
+// commented line below is necessary to export the function defined just after.
 // [[Rcpp::export]]
 
 List rcpp_sherif(List paramsSimul, List paramsModel) {
@@ -91,7 +91,7 @@ List rcpp_sherif(List paramsSimul, List paramsModel) {
 												  calc_WIW_Re,
 												  seed);
 	
-
+	
 	List timeSim(mc_iter);
 	List cumInc(mc_iter);
 	List cumInc_hcw(mc_iter);
@@ -109,7 +109,7 @@ List rcpp_sherif(List paramsSimul, List paramsModel) {
 	for (int i=0; i<mc_iter; i++) {
 		// times of events
 		timeSim[i]		= sim_mc[i].get_time();
-
+		
 		// Cumulative incidence:
 		cumInc[i]		= sim_mc[i].get_cumIncidence();
 		cumInc_hcw[i]	= sim_mc[i].get_cumIncidence_hcw();
@@ -149,3 +149,175 @@ List rcpp_sherif(List paramsSimul, List paramsModel) {
 						);
 	
 }
+
+
+// commented line below is necessary to export the function defined just after.
+// [[Rcpp::export]]
+
+List rcpp_sherif_spatial(List paramsSimul,
+						 List paramsModel,
+						 List paramsSpatial) {
+	
+	// Unpack all model parameters
+	
+	double latent_mean			= paramsModel["meanDur_latent"];
+	double infectious_mean_H	= paramsModel["meanDur_infectious_H"];
+	double infectious_mean_Hw	= paramsModel["meanDur_infectious_Hw"];
+	double infectious_mean_F	= paramsModel["meanDur_infectious_F"];
+	double infectious_mean_R	= paramsModel["meanDur_infectious_R"];
+	double hosp_mean_F			= paramsModel["meanDur_hosp_F"];
+	double hosp_mean_R			= paramsModel["meanDur_hosp_R"];
+	double funeral_mean			= paramsModel["meanDur_funeral"];
+	int nE						= paramsModel["nE"];
+	int nI						= paramsModel["nI"];
+	int nH						= paramsModel["nH"];
+	int nF						= paramsModel["nF"];
+	vector<double>	beta_IS		= paramsModel["beta_IS"];
+	vector<double>	beta_FS		= paramsModel["beta_FS"];
+	vector<double>	beta_IwS	= paramsModel["beta_IwS"];
+	vector<double>	beta_ISw	= paramsModel["beta_ISw"];
+	vector<double>	beta_FSw	= paramsModel["beta_FSw"];
+	vector<double>	beta_IwSw	= paramsModel["beta_IwSw"];
+	vector<double>	beta_HSw	= paramsModel["beta_HSw"];
+	
+	double	delta				= paramsModel["delta"];
+	double	deltaH				= paramsModel["deltaH"];
+	double	pH					= paramsModel["pH"];
+	double	pHw					= paramsModel["pHw"];
+	
+	vector<double> migrationParams	= paramsModel["migrationParams"];
+	
+	// Unpack all simulation parameters
+	unsigned long mc_iter		= paramsSimul["mc_iter"];
+	double	horizon				= paramsSimul["horizon"];
+	double	timeStepTauleap		= paramsSimul["timeStepTauLeap"];
+	bool	calc_WIW_Re			= paramsSimul["calc_WIW_Re"];
+	int		seed				= paramsSimul["seed"];
+	unsigned int timeIdxGI		= paramsSimul["timeIdxGI"];
+	
+	// Unpack spatial parameters
+	unsigned int nLocations				= paramsSpatial["nLocations"];
+	vector<unsigned long> popLocations	= paramsSpatial["popLocations"];
+	
+	vector<unsigned long> initI			= paramsSpatial["init_I1"];
+	vector<unsigned long> initIw		= paramsSpatial["init_Iw1"];
+	vector<unsigned long> initSw		= paramsSpatial["init_Sw1"];
+	
+	vector<double> distLoc				= paramsSpatial["distLocations"];
+	
+	
+	
+	// === Simulations ===
+	
+	spatialSim spSim(nLocations, popLocations, distLoc,
+					 migrationParams);
+	
+	
+	spSim.initialize_all_simulators(beta_IS,
+							  beta_FS,
+							  beta_IwS,
+							  beta_ISw,
+							  beta_FSw,
+							  beta_IwSw,
+							  beta_HSw,
+							  
+							  latent_mean,
+							  infectious_mean_H,
+							  infectious_mean_Hw,
+							  infectious_mean_F,
+							  infectious_mean_R,
+							  hosp_mean_F,
+							  hosp_mean_R,
+							  funeral_mean,
+							  
+							  delta,
+							  deltaH,
+							  pH,
+							  pHw,
+									
+							  nE, nI, nH, nF);
+	
+	
+	vector<spatialSim> spSim_mc = MC_run_tauLeap_spatial_sim(spSim,
+															 mc_iter,
+															 horizon,
+															 timeStepTauleap,
+															 initI, initIw, initSw,
+															 calc_WIW_Re,
+															 seed);
+	
+	
+	List location; //(nLocations);
+	
+	
+	for (int L=0; L<nLocations; L++) {
+		
+		List timeSim(mc_iter);
+		List cumInc(mc_iter);
+		List cumInc_hcw(mc_iter);
+		List inc(mc_iter);
+		List inc_hcw(mc_iter);
+		List deaths(mc_iter);
+		List deaths_hcw(mc_iter);
+		List deaths_all(mc_iter);
+		List GIbck_time(mc_iter);
+		List GIbck_gi(mc_iter);
+		List Reff_timeAcq(mc_iter);
+		List Reff_n2ndCases(mc_iter);
+		List time_firstCase(mc_iter);
+
+		for (int i=0; i<mc_iter; i++) {
+			// times of events
+			timeSim[i]		= spSim_mc[i].get_simulator(L).get_time();
+			
+			// Cumulative incidence:
+			cumInc[i]		= spSim_mc[i].get_simulator(L).get_cumIncidence();
+			cumInc_hcw[i]	= spSim_mc[i].get_simulator(L).get_cumIncidence_hcw();
+			
+			inc[i]			= spSim_mc[i].get_simulator(L).get_incidence();
+			inc_hcw[i]		= spSim_mc[i].get_simulator(L).get_incidence_hcw();
+			
+			// Deaths:
+			deaths[i]		= spSim_mc[i].get_simulator(L).get_fatal_cum_genPop();
+			deaths_hcw[i]	= spSim_mc[i].get_simulator(L).get_fatal_cum_hcw();
+			deaths_all[i]	= spSim_mc[i].get_simulator(L).get_fatal_incid_all();
+			
+			// Times when Backward generation interval is requested
+			// and vector of all GI at that time
+			GIbck_time[i]	= spSim_mc[i].get_simulator(L).get_GIbck_times(timeIdxGI);
+			GIbck_gi[i]		= spSim_mc[i].get_simulator(L).get_GIbck_gi(timeIdxGI);
+			
+			// Effective reproductive number
+			// (realized number of secondary cases for every individual)
+			Reff_timeAcq[i]		= spSim_mc[i].get_simulator(L).get_Reff_final_timeAcq();
+			Reff_n2ndCases[i]	= spSim_mc[i].get_simulator(L).get_Reff_final_n2ndCases();
+			
+			// Time first case appeared in this location:
+			time_firstCase[i]	= spSim_mc[i].get_simulator(L).get_time_firstCase();
+			
+		}
+		
+		string listname = "location_" + to_string(L);
+		
+		location[listname.c_str()] =  List::create(Named("time") = timeSim,
+									Named("cumIncidence") = cumInc,
+									Named("cumIncidence_hcw") = cumInc_hcw,
+									Named("incidence") = inc,
+									Named("incidence_hcw") = inc_hcw,
+									Named("deathsCum") = deaths,
+									Named("deathsCum_hcw") = deaths_hcw,
+									Named("deathsIncid_all") = deaths_all,
+									Named("GIbck_time") = GIbck_time,
+									Named("GIbck_gi") = GIbck_gi,
+									Named("Reff_timeAcq") = Reff_timeAcq,
+									Named("Reff_n2ndCases") = Reff_n2ndCases,
+									Named("time_firstCase") = time_firstCase
+									);
+		
+		
+	}
+	
+	return location;
+	
+}
+

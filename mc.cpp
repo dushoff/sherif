@@ -35,7 +35,8 @@ simulator initialize_simulation(double	beta_IS,
 								unsigned int nE,
 								unsigned int nI,
 								unsigned int nH,
-								unsigned int nF){
+								unsigned int nF,
+								unsigned long firstID){
 	
 	/// Initialize the simulator before being run.
 	/// Use 'human readable' inputs
@@ -81,7 +82,8 @@ simulator initialize_simulation(double	beta_IS,
 				  delta, deltaH,
 				  pH, pHw,
 				  popSize,
-				  nE, nI, nH, nF);
+				  nE, nI, nH, nF,
+				  firstID);
 	
 	return SIM;
 }
@@ -139,6 +141,44 @@ void MC_run_tauLeap(simulator S, unsigned long iter_mc,
 		S.display_eventCounts();
 	}
 }
+
+
+
+
+
+
+vector<spatialSim> MC_run_tauLeap_spatial_sim(spatialSim S,
+											  unsigned long iter_mc,
+											  double horizon,
+											  double timeStep,
+											  vector<unsigned long> initI,
+											  vector<unsigned long> initIw,
+											  vector<unsigned long> initSw,
+											  bool calc_WIW_Re,
+											  int seed){
+	
+	
+	vector<spatialSim> sim_out;
+	
+	// Forces the seed to be different for each job
+	force_seed_reset(seed);
+	
+	// Monte-Carlo loop
+	for(unsigned long i=0; i<iter_mc; i++){
+		cout<<endl<<"MC "<<i+1<<"/"<<iter_mc<<" (tau leap "<<timeStep<<")"<<endl;
+		S.run_tauLeap_spatial(horizon, timeStep, initI, initIw,initSw, calc_WIW_Re);
+		sim_out.push_back(S);
+		
+		// DEBUG
+//		cout<< i<<"-DEBUG time first case:";
+//		displayVector(S.get_time_firstCase());
+//		cout<<i<<"-DEBUG cumMove: "<<S.get_cumMovements()<<endl;
+		// ======
+		
+	}
+	return sim_out;
+}
+
 
 
 

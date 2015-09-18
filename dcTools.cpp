@@ -1299,9 +1299,9 @@ vector<int>	uniformIntVector(int seed, int size, int min, int max)
 
 vector< long> uniformIntVectorUnique(long size, long min, long max)
 {
-	// Returns a vector of size "size",
-	// with elements integers randomly
-	// drawn from [min;max]
+	/// Returns a vector of size "size",
+	/// with elements integers randomly
+	/// drawn from [min;max]
 	// == No redundant elements ==
 	
 	// Check if it is possible to have uniqueness
@@ -1327,6 +1327,42 @@ vector< long> uniformIntVectorUnique(long size, long min, long max)
 		// pop element to ensure uniqueness
 		x = popElementValue(x, v_i);
 	}
+	return res;
+}
+
+
+vector<unsigned long> uniformIntVectorUnique(unsigned long size,unsigned long min,unsigned long max)
+{
+	/// Returns a vector of size "size"
+	/// (or 'max-min' if max-min<size)
+	/// with elements integers randomly
+	/// drawn from [min;max]
+	// == No redundant elements ==
+	
+	// Check if it is possible to have uniqueness
+	// -- DISABLED --
+//	string errmsg = "Cannot guarantee uniqueness (size=" + to_string(size) + " > vector range:" + to_string(max-min+1) + ")";
+//	stopif (size > max-min+1, errmsg);
+	
+	// Vector x: min,min+1,...,max
+	vector<unsigned long> x(max-min+1);
+	x[0] = min;
+	for (int i=1; i<x.size(); i++)
+		x[i] = x[i-1]+1;
+	
+	vector<unsigned long> res;
+	
+	if(size<x.size()){
+		for (int i=0; i<size; i++){
+			unsigned long v_i = extractElementRandom(x);
+			res.push_back(v_i);
+			// pop element to ensure uniqueness
+			x = popElementValue(x, v_i);
+		}
+	}
+	
+	if(size>=x.size()) res = x;
+	
 	return res;
 }
 

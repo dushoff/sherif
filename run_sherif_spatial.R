@@ -37,8 +37,8 @@ prm.model <- loadParam("param_model.csv")
 ### Load spatial parameters
 ###
 prm.spatial <- loadSpatialParam()
-
 prm.model <- replicate.contact.rates(nLocations = prm.spatial[["nLocations"]], prm.model)
+prm.model=c(prm.model,loadParamMigration("gravity_cst.csv"))
 
 ### Run the SHERIF simulations
 ###
@@ -47,6 +47,7 @@ sim <- run.sherif.spatial.parallel(prm.simul = prm.simul,
                                    prm.spatial = prm.spatial,
                                    ncpus = ncpus, 
                                    path.sherif.lib = path.sherif.lib)
+
 
 
 
@@ -71,7 +72,10 @@ for(loc in 1:prm.spatial[["nLocations"]]){
 }
 
 ### PLOTS ###
-if(TRUE){
+###
+### Doesn't work for multi-locations (non-spatial model ok) ==> FIX THIS! (not high priority)
+###
+if(FALSE){
   plot.sim.all.mc(sim,"cumIncidence")
   
   # Summary across all MC iterations:

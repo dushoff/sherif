@@ -1,6 +1,6 @@
 horizon,300
-mc_iter,20
-calc_WIW_Re,1
+mc_iter,8
+calc_WIW_Re,0
 timeStepTauLeap,0.20
 seed,1234
 timeIdxGI,25

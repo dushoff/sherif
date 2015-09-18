@@ -68,7 +68,7 @@ double	beta(double a, double b);
 
 int		uniformInt(int min, int max); // Uniform INTEGER in [min;max]
 int		geometric(double p);
-int		binom(double p, int N);	// Binomial(p,N) N trials with probability of success p
+int		binom(double p, unsigned long N);	// Binomial(p,N) N trials with probability of success p
 int		binom_old(int seed, double p, int N);	// Binomial(p,N) N trials with probability of success p
 unsigned long	poisson(double expectedValue);
 int		poisson_old(int seed, double expectedValue);

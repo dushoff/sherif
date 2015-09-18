@@ -44,6 +44,7 @@ loadSpatialParam <- function(){
 	res[["init_Iw1"]] <- A[,2]
 	res[["init_Sw1"]] <- A[,3]
 	
+
 	
 	# Integrity checks
 	stopifnot(res[["nLocations"]]==length(res[["popLocations"]]))
@@ -73,3 +74,9 @@ replicate.contact.rates <- function(nLocations, prm.model){
 	return(prm.model)
 }
 
+
+loadParamMigration <- function(filename){
+	# Migration parameters:
+	mig <- read.csv(filename,header=FALSE)
+	return(list(migrationParams= mig[,2]))
+}

@@ -51,6 +51,7 @@ public:
 	
 	void set_GIbck(double x) {_GIbck = x;}
 	void set_GIfwd_incr(double x) {_GIfwd.push_back(x);}
+	void set_GIfwd(vector<double> x) {_GIfwd = x;}
 	
 	
 	// ====== GET FUNCTIONS =======

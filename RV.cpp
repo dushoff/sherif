@@ -89,7 +89,7 @@ int geometric(double p)
 	return dist(_RANDOM_GENERATOR);
 }
 
-int	binom(double p, int N)
+int	binom(double p, unsigned long N)
 {
 	stopif( (p<0 || p>1),
 		   "probability ("+to_string(p)+") not in [0;1]");

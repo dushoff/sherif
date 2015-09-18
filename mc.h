@@ -11,7 +11,7 @@
 
 #include <stdio.h>
 #include "simulator.h"
-
+#include "spatialSim.h"
 
 simulator initialize_simulation(double	beta_IS,
 								double	beta_FS,
@@ -38,7 +38,8 @@ simulator initialize_simulation(double	beta_IS,
 								unsigned int nE,
 								unsigned int nI,
 								unsigned int nH,
-								unsigned int nF);
+								unsigned int nF,
+								unsigned long firstID=0);
 
 
 void MC_run_tauLeap(simulator S,
@@ -64,7 +65,16 @@ vector<simulator> MC_run_tauLeap_sim(simulator S,
 									 int seed);
 
 
-//vector<unsigned long> get_cumIncidence(vector<simulator> sim);
+vector<spatialSim> MC_run_tauLeap_spatial_sim(spatialSim S,
+											  unsigned long iter_mc,
+											  double horizon,
+											  double timeStep,
+											  vector<unsigned long> initI,
+											  vector<unsigned long> initIw,
+											  vector<unsigned long> initSw,
+											  bool calc_WIW_Re,
+											  int seed);
+
 
 
 
