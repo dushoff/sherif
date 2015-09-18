@@ -18,7 +18,7 @@ t0 <- as.numeric(Sys.time())
 args <- commandArgs(trailingOnly = TRUE)
 
 ### R package for SHERIF is installed locally:
-path.sherif.lib <- "../Rcpp-sherif/library"
+path.sherif.lib <- "../lib"
 
 library(sherif,lib.loc = path.sherif.lib)
 library(synlik)

@@ -16,7 +16,7 @@ t0 <- as.numeric(Sys.time())
 
 ### R package for SHERIF is installed locally:
 ###
-path.sherif.lib <- "./Rcpp-sherif/library"
+path.sherif.lib <- "./lib"
 
 library(sherif, lib.loc = path.sherif.lib)
 
