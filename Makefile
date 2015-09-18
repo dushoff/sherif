@@ -83,7 +83,6 @@ initLocations.csv nLocations.csv param_model.csv param_simul.csv popLocations.cs
 	-mkdir NIH_format
 	Rscript $< > $@ &
 
-
 ### Temporary copying rules ###
 
 files: $(libh) $(libcpp)
