@@ -17,5 +17,9 @@ commit.txt
 
 *.out
 
+*.so
+*.rd*
+
+NIH_format/*
 
 compiler.mk
