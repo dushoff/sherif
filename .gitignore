@@ -8,6 +8,7 @@ commit.txt
 .*.aux
 *.blg
 *.bbl
+*.gz
 
 *.Rout
 *.RR
@@ -22,5 +23,6 @@ commit.txt
 
 NIH_format/*
 lib/*
+*sherif/*
 
 compiler.mk
