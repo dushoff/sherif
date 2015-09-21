@@ -1,7 +1,7 @@
 ### Hooks for the editor to set the default target
 current: target
 
-target pngtarget pdftarget vtarget acrtarget: simple_run.out 
+target pngtarget pdftarget vtarget acrtarget: spatial_test.Rout 
 
 ##################################################################
 
@@ -17,7 +17,7 @@ include $(ms)/git.def
 
 # compiler.mk is intended to be a local file; it uses clang by default, but you can just edit and save it on any particular machine. Don't add it to sources
 
-include compiler.mk
+-include compiler.mk
 compiler.mk:
 	/bin/cp clang.mk $@
 
@@ -33,13 +33,15 @@ Sources += exe.mk
 
 lib:
 	mkdir $@
-
-lib/sherif: make_library.Rout ;
+	-cp -r ../../lib/sherif $@
 
 libroot = EventNumberContainer dcTools RV globalVar individual mc dcDataFrame simulator dcMatrix spatialSim
 libcpp = $(libroot:%=%.cpp) Rwrap_sherif.cpp
 libh = $(libroot:%=%.h)
 Sources += make_library.R $(libcpp) $(libh) Makevars
+
+lib/sherif: 
+	$(MAKE) make_library.Rout
 
 make_library.Rout: $(libh) $(libcpp) lib Makevars make_library.R
 	-/bin/rm -rf sherif
@@ -77,29 +79,22 @@ example_plots.Rout: NIH_example.Rout example_plots.R
 
 NIH_example_dir: NIH_example.Rout ; 
 
-Sources += run_sherif_spatial.R run_sherif_spatial_FCT.R
-Sources += distLocations.csv gravity_cst.csv initLocations.csv nLocations.csv param_model.csv param_simul.csv popLocations.csv prediction_date.csv
+##################################################################
 
-# DC's rules:
-simple_run.out: run_sherif_spatial.R lib/sherif run_sherif_spatial_FCT.R distLocations.csv gravity_cst.csv \
-initLocations.csv nLocations.csv param_model.csv param_simul.csv popLocations.csv prediction_date.csv
-	-mkdir NIH_format
-	Rscript $< > $@ &
+# Do a spatial test (JD's version)
 
 spatial_test.Rout: NIH_format
 
 NIH_format:
 	mkdir $@
 
-Sources += spatial_test.R
-spatial_test.Rout: format_NIH.Rout run_sherif_spatial_FCT.Rout loadParam_FCT.Rout spatial_test.R
+SpatialCSV = distLocations.csv gravity_cst.csv initLocations.csv nLocations.csv param_model.csv param_simul.csv popLocations.csv prediction_date.csv
+Sources += $(SpatialCSV)
+Sources += spatial_test.R run_sherif_spatial_FCT.R
+spatial_test.Rout: format_NIH.Rout $(SpatialCSV) run_sherif_spatial_FCT.Rout loadParam_FCT.Rout spatial_test.R
 	$(run-R)
 
-### Temporary copying rules ###
-
-files: $(libh) $(libcpp)
-$(libh) $(libcpp):
-	/bin/cp ~/Dropbox/SHERIF/$@ .
+##################################################################
 
 # JD git rules
 -include $(ms)/git.mk
@@ -108,7 +103,7 @@ $(libh) $(libcpp):
 -include $(ms)/compare.mk
 -include $(ms)/local.mk
 
-Makefile: ../makestuff
+Makefile: lib ../makestuff
 
 ../makestuff: ../%:
 	cd .. && git clone git@github.com:dushoff/$*.git
