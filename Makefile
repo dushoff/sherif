@@ -9,9 +9,9 @@ target pngtarget pdftarget vtarget acrtarget: simple_run.out
 
 Sources = Makefile .gitignore 
 
-ms = ../makestuff
+#ms = ../makestuff
 
-include $(ms)/git.def
+#include $(ms)/git.def
 
 ##################################################################
 
@@ -100,6 +100,7 @@ $(libh) $(libcpp):
 	/bin/cp ~/Dropbox/SHERIF/$@ .
 
 # JD git rules
+- ms = ../makestuff
 -include $(ms)/git.mk
 -include $(ms)/visual.mk
 -include $(ms)/RR.mk
