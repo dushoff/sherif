@@ -8,9 +8,7 @@
 ####################################################
 ####################################################
 
-library(plyr)
-library(reshape2)
-library(snowfall)
+source("format_NIH.R")
 
 # args <- commandArgs(trailingOnly = TRUE)
 
@@ -26,6 +24,9 @@ library(sherif, lib.loc = path.sherif.lib)
 ###
 library(parallel) 
 ncpus <- detectCores(all.tests = TRUE, logical = FALSE)
+
+source("run_sherif_spatial_FCT.R")
+source("./loadParam_FCT.R")
 
 ### Load simulation parameters
 ###

@@ -77,8 +77,11 @@ example_plots.Rout: NIH_example.Rout example_plots.R
 
 NIH_example_dir: NIH_example.Rout ; 
 
+Sources += run_sherif_spatial.R run_sherif_spatial_FCT.R
+Sources += distLocations.csv gravity_cst.csv initLocations.csv nLocations.csv param_model.csv param_simul.csv popLocations.csv prediction_date.csv
+
 # DC's rules:
-simple_run.out: run_sherif_spatial.R run_sherif_spatial_FCT.R distLocations.csv gravity_cst.csv \
+simple_run.out: run_sherif_spatial.R lib/sherif run_sherif_spatial_FCT.R distLocations.csv gravity_cst.csv \
 initLocations.csv nLocations.csv param_model.csv param_simul.csv popLocations.csv prediction_date.csv
 	-mkdir NIH_format
 	Rscript $< > $@ &
@@ -89,8 +92,7 @@ NIH_format:
 	mkdir $@
 
 Sources += spatial_test.R
-spatial_test.Rout: format_NIH.Rout run_sherif_spatial_FCT.Rout Calibration/loadParam_FCT.Rout spatial_test.R
-spatial_test.Rout: run_sherif_spatial.R
+spatial_test.Rout: format_NIH.Rout run_sherif_spatial_FCT.Rout loadParam_FCT.Rout spatial_test.R
 	$(run-R)
 
 ### Temporary copying rules ###
