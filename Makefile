@@ -11,7 +11,7 @@ Sources = Makefile .gitignore
 
 ms = ../makestuff
 
-include $(ms)/git.def
+-include $(ms)/git.def
 
 ##################################################################
 
