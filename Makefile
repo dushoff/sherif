@@ -83,7 +83,7 @@ NIH_example_dir: NIH_example.Rout ;
 
 # Do a spatial test (JD's version)
 
-spatial_test.Rout: NIH_format
+spatial_test.Rout: NIH_format lib/sherif
 
 NIH_format:
 	mkdir $@
