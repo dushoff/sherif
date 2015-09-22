@@ -24,5 +24,6 @@ commit.txt
 NIH_format/*
 lib/*
 *sherif/*
+sherif.Rcheck*
 
 compiler.mk
