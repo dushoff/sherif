@@ -5,7 +5,7 @@ library(snowfall)
 
 run.sherif.parallel <- function(prm.simul, prm.model, ncpus, path.sherif.lib){
 	
-	sfInit(parallel = TRUE, cpu = ncpus)
+	sfInit(parallel = FALSE, cpu = ncpus)
 	sfLibrary(sherif,lib.loc = path.sherif.lib)
 	
 	snow.wrap.sherif <- function(i){
