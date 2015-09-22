@@ -1,9 +1,9 @@
 ####################################################
 ####################################################
 ####    
-###    WRAPS SHERIF MODEL FOR USE IN 'SYNLIK' PKG
+###    Approximate Bayesian Computation Calibration
 ###
-###    Created 2015-08-11 by David Champredon
+###    Created 2015-09-22 by David Champredon
 ###
 ####################################################
 ####################################################
@@ -145,17 +145,16 @@ weigths <- rep(1.0,length(SS.data))
 for(i in 1:npts.lhs){
   dist.data[i] <-dist.relative(mss[[i]],as.numeric(SS.data),weigths) 
 }
+prm2fit.val$ABCdist <- dist.data
 
 
 ### Retrieve best and top trial parameters (=shortest distances)
-tmp <- order(dist.data)
-idx.best <- (tmp<=3)
+tmp <- rank(dist.data)
+idx.best <- (tmp<=12)
 idx.top <- (tmp==1)
 
 param.best <- prm2fit.val[idx.best,]
-param.best$ABCdist <- dist.data[idx.best]
 param.best
-
 param.top <- prm2fit.val[idx.top,]
 param.top
 
@@ -167,16 +166,57 @@ true.prm <- get.param(paramNames = names(prm2fit.val),
                       tag = "_vec")
 
 
-plot.pair.ABC <- function(var1,var2, true.prm){
-  var1="beta_IS_vec1"
-  var2 = "meanDur_latent"
-  t1 <- true.prm[var1]
-  t1 <- true.prm[var1]
+plot.pair.ABC <- function(var1,var2, true.prm, 
+                          prm2fit.val,param.best, param.top){
+  
+  t1 <- true.prm[var1][[1]]
+  t2 <- true.prm[var2][[1]]
+  
+  p1 <- prm2fit.val[,var1]
+  p2 <- prm2fit.val[,var2]
+
+  best1 <- param.best[,var1]
+  best2 <- param.best[,var2]
+  top1 <- param.top[,var1]
+  top2 <- param.top[,var2]
+  
+  dcol <- prm2fit.val$ABCdist/max(prm2fit.val$ABCdist)
+  
+  plot(x=p1, y=p2, xlab=var1, ylab=var2, pch=16, cex=1, col=rgb(0,0,0,1-dcol))
+  abline(v=t1,lty=2,lwd=4,col="blue")
+  abline(h=t2,lty=2,lwd=4,col="blue")
+  points(x=best1, y=best2, pch=1, cex=1.7, col="orange",lwd=6)
+  points(x=top1, y=top2, pch=5, cex=3, lwd=4, col="red")
+ 
 }
 
-plot.ABC.result <- function(param.best, param.top,true.prm){
-  
+
+plot.ABC.result <- function(true.prm, 
+                            prm2fit.val,
+                            param.best, 
+                            param.top){
+  nam <- names(prm2fit.val)
+  nn <- length(nam)
+  q <- floor(sqrt((nn-1)*(nn-2)/2))
+  par(mfrow=c(q,q))
+  for(i in 1:nn)
+    for(j in (i+1):nn){
+      if( (!grepl("ABCdist",nam[i])) & (!grepl("ABCdist",nam[j])) ){
+        plot.pair.ABC(var1=nam[i], var2=nam[j],
+                      true.prm,
+                      prm2fit.val,
+                      param.best, 
+                      param.top)
+      }
+    }
 }
+
+pdf("calib_result_ABC.pdf",width = 15,height = 10)
+plot.ABC.result(true.prm, 
+                prm2fit.val,
+                param.best, 
+                param.top)
+dev.off()
 
 ######################################################################
 
