@@ -120,10 +120,11 @@ sherif_spatial_wrap <- function(param, nsim, extraArgs, ...){
 	paramsModel <- extraArgs[["paramsModel"]]
 	paramsSimul <- extraArgs[["paramsSimul"]]
 	paramsSpatial <- extraArgs[["paramsSpatial"]]
-	paramsModel <- update.param(param = param,
-								paramsModel = paramsModel,
-								tag="_vec")
 	
+	if(!is.null(param))
+	  paramsModel <- update.param(param = param,
+	                              paramsModel = paramsModel,
+	                              tag="_vec")
 	
 	# Overrides mc_iter by nsim
 	paramsSimul[["mc_iter"]] <- nsim
