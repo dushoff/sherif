@@ -1416,13 +1416,13 @@ bool simulator::is_indiv_susceptible(unsigned long ID){
 	
 	unsigned int s		= getState_S();
 	unsigned int sw		= getState_Sw();
+	
 	unsigned long idx	= findIndivIdx(ID);
 	
 	bool res = true;
 	if( _indiv[idx].get_state()!=s &&
 	    _indiv[idx].get_state()!=sw)
 		res = false;
-
 	return res;
 }
 
