@@ -155,7 +155,8 @@ vector<spatialSim> MC_run_tauLeap_spatial_sim(spatialSim S,
 											  vector<unsigned long> initIw,
 											  vector<unsigned long> initSw,
 											  bool calc_WIW_Re,
-											  int seed){
+											  int seed,
+											  bool silentMode){
 	
 	
 	vector<spatialSim> sim_out;
@@ -165,8 +166,8 @@ vector<spatialSim> MC_run_tauLeap_spatial_sim(spatialSim S,
 	
 	// Monte-Carlo loop
 	for(unsigned long i=0; i<iter_mc; i++){
-		cout<<endl<<"MC "<<i+1<<"/"<<iter_mc<<" (tau leap "<<timeStep<<")"<<endl;
-		S.run_tauLeap_spatial(horizon, timeStep, initI, initIw,initSw, calc_WIW_Re);
+		if(!silentMode) cout<<endl<<"MC "<<i+1<<"/"<<iter_mc<<" (tau leap "<<timeStep<<")"<<endl;
+		S.run_tauLeap_spatial(horizon, timeStep, initI, initIw,initSw, calc_WIW_Re,silentMode);
 		sim_out.push_back(S);
 		
 		// DEBUG

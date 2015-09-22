@@ -30,6 +30,8 @@ class spatialSim{
 	
 	bool					all_in_R_or_D();
 	
+	bool					_silentMode;		// display messages (or not) during execution
+	
 public:
 	
 	spatialSim(){};
@@ -72,7 +74,8 @@ public:
 							 vector<unsigned long> initI,
 							 vector<unsigned long> initIw,
 							 vector<unsigned long> initSw,
-							 bool calc_WIW_Re);
+							 bool calc_WIW_Re,
+							 bool silentMode);
 	
 	
 	// ==========================
@@ -83,7 +86,7 @@ public:
 	// ==========================
 	
 	void		set_gravity_cst(vector<double> x){_gravity_cst=x;}
-	
+	void		set_silentMode(bool x){_silentMode = x;}
 	
 	// ==========================
 	

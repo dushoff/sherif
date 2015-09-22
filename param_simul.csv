@@ -4,3 +4,4 @@ calc_WIW_Re,0
 timeStepTauLeap,0.20
 seed,1234
 timeIdxGI,25
+silentMode,1

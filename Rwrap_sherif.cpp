@@ -54,6 +54,7 @@ List rcpp_sherif(List paramsSimul, List paramsModel) {
 	bool	calc_WIW_Re			= paramsSimul["calc_WIW_Re"];
 	int		seed				= paramsSimul["seed"];
 	unsigned int timeIdxGI		= paramsSimul["timeIdxGI"];
+	bool	silentMode			= paramsSimul["silentMode"];
 	
 	// === Simulations ===
 	

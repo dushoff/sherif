@@ -73,7 +73,8 @@ vector<spatialSim> MC_run_tauLeap_spatial_sim(spatialSim S,
 											  vector<unsigned long> initIw,
 											  vector<unsigned long> initSw,
 											  bool calc_WIW_Re,
-											  int seed);
+											  int seed,
+											  bool silentMode);
 
 
 

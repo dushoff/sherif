@@ -124,11 +124,13 @@ void spatialSim::run_tauLeap_spatial(double horizon,
 									 vector<unsigned long> initI,
 									 vector<unsigned long> initIw,
 									 vector<unsigned long> initSw,
-									 bool calc_WIW_Re){
+									 bool calc_WIW_Re,
+									 bool silentMode = true){
 	
 	/// Run the epidemic simulation for ALL locations with the
 	/// tau-leap Poisson approximation of Gillespie algorithm
 	
+	set_silentMode(silentMode);
 	
 	double t = 0.0;
 	
@@ -237,7 +239,7 @@ void spatialSim::run_tauLeap_spatial(double horizon,
 			}
 		}
 		
-		if (_simulator[i]._count_events_sim_ignored>0){
+		if (_simulator[i]._count_events_sim_ignored>0 && !_silentMode){
 			cout << "Warning tau-leap algorithm: "<< endl<< _simulator[i]._count_events_sim_ignored;
 			cout << " events were ignored out of a total of "<<_simulator[i]._count_events_sim<<" events (";
 			cout << (double)(_simulator[i]._count_events_sim_ignored)/(double)(_simulator[i]._count_events_sim)*100.0<<"%)";
