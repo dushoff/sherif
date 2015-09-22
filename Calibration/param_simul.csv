@@ -4,3 +4,4 @@ timeStepTauLeap, 0.2
 calc_WIW_Re, 0
 seed, 12345
 timeIdxGI, 63
+silentMode,1
