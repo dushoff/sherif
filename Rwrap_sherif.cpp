@@ -195,6 +195,7 @@ List rcpp_sherif_spatial(List paramsSimul,
 	bool	calc_WIW_Re			= paramsSimul["calc_WIW_Re"];
 	int		seed				= paramsSimul["seed"];
 	unsigned int timeIdxGI		= paramsSimul["timeIdxGI"];
+	bool	silentMode			= paramsSimul["silentMode"];
 	
 	// Unpack spatial parameters
 	unsigned int nLocations				= paramsSpatial["nLocations"];
@@ -245,7 +246,7 @@ List rcpp_sherif_spatial(List paramsSimul,
 															 timeStepTauleap,
 															 initI, initIw, initSw,
 															 calc_WIW_Re,
-															 seed);
+															 seed, silentMode);
 	
 	
 	List location; //(nLocations);
