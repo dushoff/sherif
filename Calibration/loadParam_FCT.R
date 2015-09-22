@@ -28,11 +28,12 @@ loadSpatialParam <- function(){
 	
 	res <- list()
 	
-	# number of spatial locations:
-	res[["nLocations"]] <- as.numeric(read.csv("nLocations.csv",header=FALSE))
-	
 	# Population size in each locations:
 	res[["popLocations"]] <- as.numeric(read.csv("popLocations.csv",header=FALSE)[,1])
+	
+	# number of spatial locations:
+	nLocations<- length(res[["popLocations"]])
+	res[["nLocations"]] <- nLocations
 	
 	# Distance between locations:
 	M <- as.matrix(read.csv("distLocations.csv",header=FALSE))
@@ -47,11 +48,11 @@ loadSpatialParam <- function(){
 
 	
 	# Integrity checks
-	stopifnot(res[["nLocations"]]==length(res[["popLocations"]]))
-	stopifnot(res[["nLocations"]]^2==length(res[["distLocations"]]))
-	stopifnot(res[["nLocations"]]==length(res[["init_I1"]]))
-	stopifnot(res[["nLocations"]]==length(res[["init_Iw1"]]))
-	stopifnot(res[["nLocations"]]==length(res[["init_Sw1"]]))
+	stopifnot(nLocations==length(res[["popLocations"]]))
+	stopifnot(nLocations^2==length(res[["distLocations"]]))
+	stopifnot(nLocations==length(res[["init_I1"]]))
+	stopifnot(nLocations==length(res[["init_Iw1"]]))
+	stopifnot(nLocations==length(res[["init_Sw1"]]))
 	
 	return(res)
 }
