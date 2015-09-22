@@ -1,7 +1,7 @@
 ### Hooks for the editor to set the default target
 current: target
 
-target pngtarget pdftarget vtarget acrtarget: NIH_example.Rout 
+target pngtarget pdftarget vtarget acrtarget: spatial_test.Rout 
 
 ##################################################################
 
@@ -9,15 +9,15 @@ target pngtarget pdftarget vtarget acrtarget: NIH_example.Rout
 
 Sources = Makefile .gitignore 
 
-#ms = ../makestuff
+ms = ../makestuff
 
-#include $(ms)/git.def
+include $(ms)/git.def
 
 ##################################################################
 
 # compiler.mk is intended to be a local file; it uses clang by default, but you can just edit and save it on any particular machine. Don't add it to sources
 
-include compiler.mk
+-include compiler.mk
 compiler.mk:
 	/bin/cp clang.mk $@
 
@@ -33,18 +33,19 @@ Sources += exe.mk
 
 lib:
 	mkdir $@
-
-lib/sherif: make_library.Rout ;
+	-cp -r ../../lib/sherif $@
 
 libroot = EventNumberContainer dcTools RV globalVar individual mc dcDataFrame simulator dcMatrix spatialSim
 libcpp = $(libroot:%=%.cpp) Rwrap_sherif.cpp
 libh = $(libroot:%=%.h)
 Sources += make_library.R $(libcpp) $(libh) Makevars
 
-make_library.Rout: $(libh) $(libcpp) make_library.R lib Makevars
+lib/sherif: 
+	$(MAKE) make_library.Rout
+
+make_library.Rout: $(libh) $(libcpp) lib Makevars make_library.R
 	-/bin/rm -rf sherif
-	#$(run-R)
-	Rscript make_library.R
+	$(run-R)
 	cp Makevars sherif/src
 	R CMD build sherif
 	R CMD check sherif
@@ -78,28 +79,31 @@ example_plots.Rout: NIH_example.Rout example_plots.R
 
 NIH_example_dir: NIH_example.Rout ; 
 
-# DC's rules:
-simple_run.out: run_sherif_spatial.R run_sherif_spatial_FCT.R distLocations.csv gravity_cst.csv \
-initLocations.csv nLocations.csv param_model.csv param_simul.csv popLocations.csv prediction_date.csv
-	-mkdir NIH_format
-	Rscript $< > $@ &
+##################################################################
 
+# Do a spatial test (JD's version)
 
-### Temporary copying rules ###
+spatial_test.Rout: NIH_format
 
-files: $(libh) $(libcpp)
-$(libh) $(libcpp):
-	/bin/cp ~/Dropbox/SHERIF/$@ .
+NIH_format:
+	mkdir $@
+
+SpatialCSV = distLocations.csv gravity_cst.csv initLocations.csv nLocations.csv param_model.csv param_simul.csv popLocations.csv prediction_date.csv
+Sources += $(SpatialCSV)
+Sources += spatial_test.R run_sherif_spatial_FCT.R
+spatial_test.Rout: format_NIH.Rout $(SpatialCSV) run_sherif_spatial_FCT.Rout loadParam_FCT.Rout spatial_test.R
+	$(run-R)
+
+##################################################################
 
 # JD git rules
-- ms = ../makestuff
 -include $(ms)/git.mk
 -include $(ms)/visual.mk
 -include $(ms)/RR.mk
+-include $(ms)/compare.mk
 -include $(ms)/local.mk
--include $(ms)/git.def
 
-Makefile: ../makestuff
+Makefile: lib ../makestuff
 
 ../makestuff: ../%:
 	cd .. && git clone git@github.com:dushoff/$*.git
