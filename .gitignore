@@ -25,5 +25,6 @@ NIH_format/*
 lib/*
 *sherif/*
 sherif.Rcheck*
+Calibration/__fromearnserv*
 
 compiler.mk
