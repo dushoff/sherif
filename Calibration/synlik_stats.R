@@ -214,20 +214,27 @@ sherif_spatial_stats_1 <- function(x,extraArgs,...){
 			s1[i] <- fit.inc$coefficients[1]
 			s2[i] <- fit.inc$coefficients[2]
 			
-			# Cum. deaths:
-			fit.death <- glm(formula = cumd~t, family = "poisson", data= df.death)
-			s3[i] <- fit.death$coefficients[1]
-			s4[i] <- fit.death$coefficients[2]
+			if(F){
+			  pp <- predict(fit.inc,data.frame(t=tt),type="response")
+			  plot(tt,cumi,typ="s",lwd=3, main = paste(round(s1[i],3),round(s2[i],3)))
+			  lines(tt,pp,col="red", lwd=3)
+			}
+			
+# 			# Cum. deaths:
+# 			fit.death <- glm(formula = cumd~t, family = "poisson", data= df.death)
+# 			s3[i] <- fit.death$coefficients[1]
+# 			s4[i] <- fit.death$coefficients[2]
 			
 			# Time first case
 			#s6[i] <- mean(time.firstCase[[i]])
 		}
 		
-		if(loc==1) M <- cbind(s1,s2,s3,s4)  #,s6)
-		if(loc>1) M <- cbind(M,cbind(s1,s2,s3,s4))  #,s6))
+		Mtmp <- cbind(s1,s2) #,s3,s4)  #,s6)
+		if(loc==1) M <- Mtmp
+		if(loc>1) M <- cbind(M,Mtmp)
 		
 		nc <- ncol(M)
-		nstats <- 4
+		nstats <- ncol(Mtmp)
 		tt <- paste0("s",c(1:nstats))
 		colnames(M)[(nc-nstats+1):nc] <- paste0("loc",loc,"_",tt)
 	}
