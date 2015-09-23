@@ -15,7 +15,7 @@ t0 <- as.numeric(Sys.time())
 ### args[2]: seed for random number generator
 ###
 
-# args <- commandArgs(trailingOnly = TRUE)
+args <- commandArgs(trailingOnly = TRUE)
 
 ### R package for SHERIF is installed locally:
 path.sherif.lib <- "../lib"
@@ -46,7 +46,7 @@ prm.model <- c(prm.model,loadParamMigration("gravity_cst.csv"))
 ### Generate target data
 ### (parameter values in 'param_true4fit.csv')
 ###
-seed <- 1234
+seed <- args[2]
 file.data <- paste0("generated-target-data.pdf")
 if(!is.na(seed)) file.data <- paste0("generated-target-data_",seed,".pdf")
 pdf(file.data, width = 12, height=10)
@@ -85,6 +85,8 @@ prior.range <- rbind(apply(prm2fit.val,MARGIN = 2, FUN = min),
 true.prm <- get.param(paramNames = names(prm2fit.val),
                       paramsModel = prm.model.true,
                       tag = "_vec")
+write.csv(x = true.prm, file= paste0("true_prm.csv"),row.names = F)
+
 
 # Summary statistics of the (generated) data
 SS.data <- sherif_spatial_stats_1(x = true.data2,
@@ -159,6 +161,11 @@ param.top <- prm2fit.val[idx.top,]
 param.top
 
 
+###   save best param
+filename <- paste0("best_ABC_",seed,".csv")
+write.csv(x = param.best, file = filename,row.names = F)
+
+
 
 ### Retrieve true values of parameters that generated the data
 true.prm <- get.param(paramNames = names(prm2fit.val),
@@ -224,4 +231,4 @@ t1<-as.numeric(Sys.time())
 msg <- paste0("--- CALIBRATION FINISHED IN ", round( (t1-t0)/60,1), " MINUTES")
 print(msg)
 message(msg)
-# save.image(paste0("result-calib-",synlik_stats_type,".RData"))
+save.image(paste0("result-calib-ABC-",seed,".RData"))
