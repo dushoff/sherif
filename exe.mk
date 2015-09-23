@@ -20,8 +20,4 @@ sim.exe: sim.cpp
 %.exe: %.cpp $(code)
 	$(CC) $(CC_FLAGS) $^ -o $@
 
-
-sim.cpp:
-	/bin/cp ~/Dropbox/SHERIF/main.cpp $@
-
 Makefile: $(header)

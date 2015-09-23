@@ -5,7 +5,7 @@ target pngtarget pdftarget vtarget acrtarget: spatial_test.Rout
 
 ##################################################################
 
-# make files
+# make files ~
 
 Sources = Makefile .gitignore 
 
