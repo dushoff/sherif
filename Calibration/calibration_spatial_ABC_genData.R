@@ -47,6 +47,7 @@ prm.model <- c(prm.model,loadParamMigration("gravity_cst.csv"))
 ### (parameter values in 'param_true4fit.csv')
 ###
 seed <- args[2]
+if(is.null(seed)) seed <- 1234
 file.data <- paste0("generated-target-data.pdf")
 if(!is.na(seed)) file.data <- paste0("generated-target-data_",seed,".pdf")
 pdf(file.data, width = 12, height=10)
@@ -78,8 +79,6 @@ prm2fit.val <- data.frame(beta_IS_vec1 = sample( seq(0.01, 0.7,length.out = npts
                           #migrationParams_vec2 = sample( seq(2, 7,length.out = npts.lhs)),
                           meanDur_latent = sample( seq(1, 15,length.out = npts.lhs))
 )
-prior.range <- rbind(apply(prm2fit.val,MARGIN = 2, FUN = min),
-                     apply(prm2fit.val,MARGIN = 2, FUN = max))
 
 ### Retrieve true values of parameters that generated the data
 true.prm <- get.param(paramNames = names(prm2fit.val),
@@ -121,9 +120,12 @@ system.time(simlist <- sfSapply(idx.apply, ABC_snowWrap,simplify = F))
 sfStop()
 
 ### Mean of the summary stats across all Monte Carlo samples
+
+ssfct <- select.spatial.stats(args[1])
+
 mss <- list()
 for(i in 1:npts.lhs){
-  tmp <- sherif_spatial_stats_1(x = simlist[[i]],
+  tmp <- ssfct(x = simlist[[i]],
                                 extraArgs = list(horizon=horizon))
   mss[[i]] <- apply(tmp,MARGIN = 2,FUN = mean)
 }

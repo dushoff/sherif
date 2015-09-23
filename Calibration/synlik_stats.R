@@ -265,77 +265,101 @@ sherif_spatial_stats_1 <- function(x,extraArgs,...){
 
 sherif_spatial_stats_2 <- function(x,extraArgs,...){
   
-  # latest time of the observed data:
-  horizon <- extraArgs[["horizon"]]
-  
-  nLocations <- length(x)
-  
-  for(loc in 1:nLocations){
-    
-    ts <- x[[loc]][["ts"]]
-    GIbck <- x[[loc]][["GIbck"]]
-    time.firstCase <- x[[loc]][["time_firstCase"]]
-    
-    nsim = length(ts)
-    
-    # All stats
-    s1 <- vector(length = nsim)
-    s2 <- vector(length = nsim)
-    s3 <- vector(length = nsim)
-    s4 <- vector(length = nsim)
-    s5 <- vector(length = nsim)
-    s6 <- vector(length = nsim)
-    
-    for(i in 1:nsim){
-      
-      # look only up to the largest time 
-      # of the observed data (do not take into account of what's beyond)
-      df <- subset(ts[[i]], time<horizon)
-      
-      tt <- df$time
-      cumi <- df$cumInc
-      cumi_hcw <- df$cumInc_hcw
-      cumd <- df$deathsCum
-      
-      df.inc <- data.frame(t=tt, cuminc=cumi)
-      df.death <- data.frame(t=tt, cumd=cumd)
-      
-      # Cum. incidence general population:
-      fit.inc <- glm(formula = cuminc~t, family = "poisson", data= df.inc)
-      s1[i] <- fit.inc$coefficients[1]
-      s2[i] <- fit.inc$coefficients[2]
-      
-      # Cum. incidence HCW:
-      # 			fit.inc.hcw <- glm(formula = cumi_hcw~t, family = "poisson", data= df.inc)
-      # 			sxxx[i] <- fit.inc$coefficients[1]
-      # 			sxxx[i] <- fit.inc$coefficients[2]	
-      
-      # Cum. deaths:
-      fit.death <- glm(formula = cumd~t, family = "poisson", data= df.death)
-      s3[i] <- fit.death$coefficients[1]
-      s4[i] <- fit.death$coefficients[2]
-      
-      # Bckwd generation interval
-      s5[i] <- mean(GIbck[[i]])
-      
-      # Time first case
-      s6[i] <- mean(time.firstCase[[i]])
-    }
-    
-    if(loc==1) M <- cbind(s1,s2,s3,s4,s5,s6)
-    if(loc>1) M <- cbind(M,cbind(s1,s2,s3,s4,s5,s6))
-    
-    nc <- ncol(M)
-    nstats <- 6
-    tt <- paste0("s",c(1:nstats))
-    colnames(M)[(nc-nstats+1):nc] <- paste0("loc",loc,"_",tt)
-  }
-  return(M)
+	# latest time of the observed data:
+	horizon <- extraArgs[["horizon"]]
+	
+	nLocations <- length(x)
+	
+	for(loc in 1:nLocations){
+		
+		ts <- x[[loc]][["ts"]]
+		time.firstCase <- x[[loc]][["time_firstCase"]]
+		
+		nsim = length(ts)
+		
+		# All stats
+		s1 <- vector(length = nsim)
+		s2 <- vector(length = nsim)
+		s3 <- vector(length = nsim)
+		s4 <- vector(length = nsim)
+		s5 <- vector(length = nsim)
+		s6 <- vector(length = nsim)
+		s.gi <- vector(length = nsim)
+		
+		for(i in 1:nsim){
+			# look only up to the largest time 
+			# of the observed data (do not take into account of what's beyond)
+			df <- subset(ts[[i]], time<horizon)
+			
+			tt <- df$time
+			cumi <- df$cumInc
+			cumi_hcw <- df$cumInc_hcw
+			cumd <- df$deathsCum
+			
+			df.inc <- data.frame(t=tt, cuminc=cumi)
+			df.death <- data.frame(t=tt, cumd=cumd)
+			
+			# Cum. incidence general population:
+# 			fit.inc <- glm(formula = cuminc~t, family = "poisson", data= df.inc)
+# 			s1[i] <- fit.inc$coefficients[1]
+# 			s2[i] <- fit.inc$coefficients[2]
+			s1[i] <- mean(cumi)
+			s2[i] <- cumi[length(cumi)]
+			
+		
+			
+			# 			# Cum. deaths:
+			# 			fit.death <- glm(formula = cumd~t, family = "poisson", data= df.death)
+			# 			s3[i] <- fit.death$coefficients[1]
+			# 			s4[i] <- fit.death$coefficients[2]
+			
+			# Time first case
+			#s6[i] <- mean(time.firstCase[[i]])
+		}
+		
+		Mtmp <- cbind(s1,s2) #,s3,s4)  #,s6)
+		if(loc==1) M <- Mtmp
+		if(loc>1) M <- cbind(M,Mtmp)
+		
+		nc <- ncol(M)
+		nstats <- ncol(Mtmp)
+		tt <- paste0("s",c(1:nstats))
+		colnames(M)[(nc-nstats+1):nc] <- paste0("loc",loc,"_",tt)
+	}
+	
+	# Bckwd generation interval
+	#
+	
+	for(i in 1:nsim){
+		m <- numeric(nLocations)
+		for(loc in 1:nLocations){
+			# the GI data are average across all locations
+			GIbck <- x[[loc]][["GIbck"]]
+			m[loc] <- mean(GIbck[[i]])
+		}
+		s.gi[i] <- mean(m,na.rm = T) # <-- remove NAs is important (some epidemic may not have started in some locations, so no GI data!)
+		# 	  print("==DEBUG::")
+		# 	  print(m)
+		# 	  print(s.gi[i])
+	}
+	
+	M <- cbind(M,s.gi)
+	colnames(M)[ncol(M)]<- "GI"
+	
+	return(M)
 }
 
 
 
 select.synlik.spatial.stats <- function(x){
+	
+	if(x==1) return(sherif_spatial_stats_1)
+	if(x==2) return(sherif_spatial_stats_2)
+	if(x==3) return(sherif_spatial_stats_3)
+	if(x==4) return(sherif_spatial_stats_4)
+}
+
+select.spatial.stats <- function(x){
 	
 	if(x==1) return(sherif_spatial_stats_1)
 	if(x==2) return(sherif_spatial_stats_2)
