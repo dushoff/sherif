@@ -24,7 +24,7 @@ deltaH,0.4
 pH,0.3
 pHw,0.9
 
-beta_IS, 0.20
+beta_IS, 0.25
 beta_FS,0.3
 beta_IwS,0.15
 beta_ISw,0.25

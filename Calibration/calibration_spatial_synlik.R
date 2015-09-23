@@ -4,6 +4,8 @@
 ###    WRAPS SHERIF MODEL FOR USE IN 'SYNLIK' PKG
 ###
 ###    Created 2015-08-11 by David Champredon
+###    Modifed 2015-09-18: takes into account real data (not generated)
+###
 ###
 ####################################################
 ####################################################
@@ -15,7 +17,8 @@ t0 <- as.numeric(Sys.time())
 ### args[2]: seed for random number generator
 ###
 
-args <- commandArgs(trailingOnly = TRUE)
+# args <- commandArgs(trailingOnly = TRUE)
+args=1
 
 ### R package for SHERIF is installed locally:
 path.sherif.lib <- "../lib"
