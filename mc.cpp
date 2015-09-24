@@ -36,7 +36,9 @@ simulator initialize_simulation(double	beta_IS,
 								unsigned int nI,
 								unsigned int nH,
 								unsigned int nF,
-								unsigned long firstID){
+								double GIbck_sampleTime,
+								unsigned long firstID
+								){
 	
 	/// Initialize the simulator before being run.
 	/// Use 'human readable' inputs
@@ -83,7 +85,8 @@ simulator initialize_simulation(double	beta_IS,
 				  pH, pHw,
 				  popSize,
 				  nE, nI, nH, nF,
-				  firstID);
+				  firstID,
+				  GIbck_sampleTime);
 	
 	return SIM;
 }

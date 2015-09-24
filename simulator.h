@@ -159,17 +159,20 @@ class simulator
 	vector<double>		_WIW_times;
 	
 	// "Backward" Generation Intervals
-	// First column : generation interval
-	// Second column : time of disease acquisition of the infectee
+	// First column		: generation interval
+	// Second column	: time of disease acquisition of the infectee
 	// There is a vector of GIbck because it can
 	// be calculated at several calendar times
 	vector<Matrix>		_GIbck;
 	// Calendar times when _GIbck is calculated
 	vector<double>		_GIbck_times;
 	
+	double				_GIbck_sampleTime;	// Time when the generation interval are calculated for all infected individuals
+	
 	
 	void			set_GIbck(unsigned long IDindiv, double gi);
 	void			set_GIfwd(unsigned long IDindiv, double gi);
+	void			set_GIbck_sampleTime(double x) {_GIbck_sampleTime = x;}
 	
 	void			set_state(unsigned long IDindiv, unsigned int s);
 	void			set_infectorID(unsigned long IDinfectee, unsigned long IDinfector);
@@ -293,7 +296,8 @@ public:
 			  unsigned int nI,
 			  unsigned int nH,
 			  unsigned int nF,
-			  unsigned long firstID);
+			  unsigned long firstID,
+			  double GIbck_sampleTime);
 	
 	
 	void	initialize(unsigned long initSw,
@@ -325,6 +329,7 @@ public:
 	Matrix					get_GIbck(unsigned int i) {return _GIbck[i];}
 	double					get_GIbck_times(unsigned int i) {return _GIbck_times[i];}
 	vector<double>			get_GIbck_gi(unsigned int i) {return _GIbck[i].extractColumn(0);}
+	double					get_GIbck_sampleTime() {return _GIbck_sampleTime;}
 	
 	Matrix					get_Reff_final() {return _Reff_final;}
 	vector<double>			get_Reff_final_timeAcq(); 

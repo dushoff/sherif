@@ -67,7 +67,8 @@ public:
 								   unsigned int nE,
 								   unsigned int nI,
 								   unsigned int nH,
-								   unsigned int nF);
+								   unsigned int nF,
+								   double GIbck_sampleTime);
 	
 	void run_tauLeap_spatial(double horizon,
 							 double timestepSize,

@@ -39,7 +39,9 @@ simulator initialize_simulation(double	beta_IS,
 								unsigned int nI,
 								unsigned int nH,
 								unsigned int nF,
-								unsigned long firstID=0);
+								double GIbck_sampleTime,
+								unsigned long firstID=0
+								);
 
 
 void MC_run_tauLeap(simulator S,

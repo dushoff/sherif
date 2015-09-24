@@ -53,7 +53,7 @@ List rcpp_sherif(List paramsSimul, List paramsModel) {
 	double	timeStepTauleap		= paramsSimul["timeStepTauLeap"];
 	bool	calc_WIW_Re			= paramsSimul["calc_WIW_Re"];
 	int		seed				= paramsSimul["seed"];
-	unsigned int timeIdxGI		= paramsSimul["timeIdxGI"];
+	double	timeIdxGI			= paramsSimul["timeIdxGI"];
 	bool	silentMode			= paramsSimul["silentMode"];
 	
 	// === Simulations ===
@@ -80,7 +80,8 @@ List rcpp_sherif(List paramsSimul, List paramsModel) {
 										  pH,
 										  pHw,
 										  popSize,
-										  nE, nI, nH, nF);
+										  nE, nI, nH, nF,
+										  timeIdxGI);
 	
 	vector<simulator> sim_mc = MC_run_tauLeap_sim(SIM,
 												  mc_iter,
@@ -125,8 +126,8 @@ List rcpp_sherif(List paramsSimul, List paramsModel) {
 		
 		// Times when Backward generation interval is requested
 		// and vector of all GI at that time
-		GIbck_time[i]	= sim_mc[i].get_GIbck_times(timeIdxGI);
-		GIbck_gi[i]		= sim_mc[i].get_GIbck_gi(timeIdxGI);
+		GIbck_time[i]	= sim_mc[i].get_GIbck_times(0);  //sim_mc[i].get_GIbck_times(timeIdxGI);
+		GIbck_gi[i]		= sim_mc[i].get_GIbck_gi(0);  //sim_mc[i].get_GIbck_gi(timeIdxGI);
 		
 		// Effective reproductive number
 		// (realized number of secondary cases for every individual)
@@ -194,7 +195,7 @@ List rcpp_sherif_spatial(List paramsSimul,
 	double	timeStepTauleap		= paramsSimul["timeStepTauLeap"];
 	bool	calc_WIW_Re			= paramsSimul["calc_WIW_Re"];
 	int		seed				= paramsSimul["seed"];
-	unsigned int timeIdxGI		= paramsSimul["timeIdxGI"];
+	double	timeIdxGI			= paramsSimul["timeIdxGI"];
 	bool	silentMode			= paramsSimul["silentMode"];
 	
 	// Unpack spatial parameters
@@ -237,7 +238,8 @@ List rcpp_sherif_spatial(List paramsSimul,
 							  pH,
 							  pHw,
 									
-							  nE, nI, nH, nF);
+							  nE, nI, nH, nF,
+									timeIdxGI);
 	
 	
 	vector<spatialSim> spSim_mc = MC_run_tauLeap_spatial_sim(spSim,
@@ -286,8 +288,8 @@ List rcpp_sherif_spatial(List paramsSimul,
 			
 			// Times when Backward generation interval is requested
 			// and vector of all GI at that time
-			GIbck_time[i]	= spSim_mc[i].get_simulator(L).get_GIbck_times(timeIdxGI);
-			GIbck_gi[i]		= spSim_mc[i].get_simulator(L).get_GIbck_gi(timeIdxGI);
+			GIbck_time[i]	= spSim_mc[i].get_simulator(L).get_GIbck_times(0); //spSim_mc[i].get_simulator(L).get_GIbck_times(timeIdxGI);
+			GIbck_gi[i]		= spSim_mc[i].get_simulator(L).get_GIbck_gi(0); //spSim_mc[i].get_simulator(L).get_GIbck_gi(timeIdxGI);
 			
 			// Effective reproductive number
 			// (realized number of secondary cases for every individual)

@@ -58,7 +58,8 @@ void spatialSim::initialize_all_simulators(vector<double>	beta_IS,
 										   unsigned int nE,
 										   unsigned int nI,
 										   unsigned int nH,
-										   unsigned int nF){
+										   unsigned int nF,
+										   double GIbck_sampleTime){
 	
 	/// Set the SAME model parameters for all locations
 	/// (hence assumes same behaviour in all locations)
@@ -94,6 +95,7 @@ void spatialSim::initialize_all_simulators(vector<double>	beta_IS,
 											  pH,pHw,
 											  _popLocations[i],
 											  nE, nI, nH, nF,
+											  GIbck_sampleTime,
 											  firstID);
 		firstID += _popLocations[i];
 		
@@ -193,10 +195,19 @@ void spatialSim::run_tauLeap_spatial(double horizon,
 				
 				// update backward GI
 				// (not at all event dates b/c of memory cost)
-				int tt = round(t);
-				if(fabs(t-tt)<0.0001) {
+				
+				// NEW STUFF (<-- delete this comment when sure OK)
+				if(fabs(t-_simulator[i].get_GIbck_sampleTime())<timestepSize/2.0) {
 					_simulator[i].update_GIbck(t);
 				}
+				
+				// DELETE (?) ---------------------
+//				int tt = round(t);
+//				if(fabs(t-tt)<0.0001) {
+//					_simulator[i].update_GIbck(t);
+//				}
+				// ---------------------------------
+				
 				
 				_simulator[i].update_incidences();
 				_simulator[i].update_prevalence(); // update prevalence time series

@@ -33,7 +33,8 @@ simulator::simulator(double	beta_IS,
 					 unsigned int nI,
 					 unsigned int nH,
 					 unsigned int nF,
-					 unsigned long firstID
+					 unsigned long firstID,
+					 double GIbck_sampleTime
 )
 {
 	/// Constructs a simulator object
@@ -68,6 +69,8 @@ simulator::simulator(double	beta_IS,
 	_nI = nI;
 	_nH = nH;
 	_nF = nF;
+	
+	_GIbck_sampleTime = GIbck_sampleTime;
 	
 	set_eventList();
 	
@@ -1105,11 +1108,17 @@ void simulator::run_tauLeap(double horizon,
 		}
 		
 		// update backward GI
+
+		// NEW STUFF 2015-09-24 (<-- delete this comment when sure OK)
+		if(fabs(t-get_GIbck_sampleTime())<timestepSize/2.0) update_GIbck(t);
+
+		// DELETE (?) ----------------------------------------
 		// (not at all event dates b/c of memory cost)
-		int tt = round(t);
-		if(fabs(t-tt)<0.0001) {
-			update_GIbck(t);
-		}
+//		int tt = round(t);
+//		if(fabs(t-tt)<0.0001) {
+//			update_GIbck(t);
+//		}
+		// --------------------------------------------------
 		
 		
 		update_incidences();
