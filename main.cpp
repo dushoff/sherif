@@ -1,4 +1,6 @@
 //
+//  ***** THIS FILE IS FOR TESTING ONLY ****
+//
 //  main.cpp
 //  SHERIF
 //
@@ -28,9 +30,9 @@ int main(int argc, const char * argv[]) {
 	
 	// Read main simulation parameters from file
 	
-	string fileparam_simul = "param_simul.csv";
-	string fileparam_model_single = "param_model_singleLoc.csv";
-	string fileparam_model = "param_model.csv";
+	string fileparam_simul			= "param_simul.csv";
+	string fileparam_model_single	= "param_model_singleLoc.csv";
+	string fileparam_model			= "param_model.csv";
 	
 	// Model parameters
 	
@@ -74,6 +76,7 @@ int main(int argc, const char * argv[]) {
 	double horizon				= getParameterFromFile("horizon", fileparam_simul);
 	unsigned long mc_iter		= getParameterFromFile("mc_iter", fileparam_simul);
 	double timeStepTauleap		= getParameterFromFile("timeStepTauLeap", fileparam_simul);
+	double GIbck_sampleTime		= getParameterFromFile("timeIdxGI", fileparam_simul);
 	unsigned long initI			= getParameterFromFile("init_I1", fileparam_model_single);
 	unsigned long initIw		= getParameterFromFile("init_Iw1", fileparam_model_single);
 	unsigned long initSw		= getParameterFromFile("init_Sw1", fileparam_model_single);
@@ -82,47 +85,52 @@ int main(int argc, const char * argv[]) {
 	
 	// === Simulations ===
 	
-	simulator SIM = initialize_simulation(beta_IS,
-										  beta_FS,
-										  beta_IwS,
-										  beta_ISw,
-										  beta_FSw,
-										  beta_IwSw,
-										  beta_HSw,
-										  
-										  latent_mean,
-										  infectious_mean_H,
-										  infectious_mean_Hw,
-										  infectious_mean_F,
-										  infectious_mean_R,
-										  hosp_mean_F,
-										  hosp_mean_R,
-										  funeral_mean,
-										  
-										  delta,
-										  deltaH,
-										  pH,
-										  pHw,
-										  popSize,
-										  nE, nI, nH, nF);
-	
 	int jobnum = 1;
 	
+	bool do_singleLocation = true;
+	bool do_multiLocation = false;
 	
 	
-	// ==== SINGLE PATCH SIMULATION ====
-	
-	if(false){
-		// --- Choose if execution outputs to files
-		// --- or outputs objects (<- used in R wrapping)
+	if(do_singleLocation){
 		
+		// ==== SINGLE PATCH SIMULATION ====
+
+		unsigned long firstID = 0;
+		simulator SIM = initialize_simulation(beta_IS,
+											  beta_FS,
+											  beta_IwS,
+											  beta_ISw,
+											  beta_FSw,
+											  beta_IwSw,
+											  beta_HSw,
+											  
+											  latent_mean,
+											  infectious_mean_H,
+											  infectious_mean_Hw,
+											  infectious_mean_F,
+											  infectious_mean_R,
+											  hosp_mean_F,
+											  hosp_mean_R,
+											  funeral_mean,
+											  
+											  delta,
+											  deltaH,
+											  pH,
+											  pHw,
+											  popSize,
+											  nE, nI, nH, nF,
+											  GIbck_sampleTime,
+											  firstID);
+		
+		// Choose if execution outputs to files
+		// or outputs objects (<- used in R wrapping)
 		bool output_to_files = false;
 		
 		if(output_to_files)
 			MC_run_tauLeap(SIM, mc_iter,horizon,
 						   timeStepTauleap,
 						   initI, initIw,initSw,
-						   jobnum,"out.out",
+						   jobnum,"fout.out",
 						   calc_WIW_Re);
 		
 		if(!output_to_files){
@@ -134,91 +142,102 @@ int main(int argc, const char * argv[]) {
 														  initI, initIw,initSw,
 														  calc_WIW_Re,
 														  seed);
+		// DEBUG
+			cout <<endl <<" GIs at time "<< sim_mc[0].get_GIbck_times(0)<<" :";
+			displayVector(sim_mc[0].get_GIbck_gi(0));
 		}
-	}
-	
-	// ==== SPATIAL SIMULATION ====
-	
-	unsigned int nLocation = 3;
-	vector<unsigned long> popLocations;
-	for(int i =0; i<nLocation; i++) popLocations.push_back(500*(i+1));
-	
-	Matrix distLoc(3,3);
-	distLoc(0,1) = 1.0;
-	distLoc(0,2) = 2.3;
-	distLoc(1,2) = 2;
-	distLoc.display();
-	vector<double> distLoc_vec = distLoc.melt();
-	
-	vector<double> vbeta_IS(nLocation,beta_IS);
-	vector<double> vbeta_FS(nLocation,beta_FS);
-	vector<double> vbeta_IwS(nLocation,beta_IwS);
-	vector<double> vbeta_ISw(nLocation,beta_ISw);
-	vector<double> vbeta_FSw(nLocation,beta_FSw);
-	vector<double> vbeta_IwSw(nLocation,beta_IwSw);
-	vector<double> vbeta_HSw(nLocation,beta_HSw);
-	
-	vector<double> migrationParams;
-	migrationParams.push_back(0.001);
-	migrationParams.push_back(5.0);
-	
-	spatialSim spSim(nLocation, popLocations, distLoc_vec, migrationParams);
+	} //end do_singleLocation
 	
 	
-	spSim.initialize_all_simulators(vbeta_IS,
-							  vbeta_FS,
-							  vbeta_IwS,
-							  vbeta_ISw,
-							  vbeta_FSw,
-							  vbeta_IwSw,
-							  vbeta_HSw,
-							  
-							  latent_mean,
-							  infectious_mean_H,
-							  infectious_mean_Hw,
-							  infectious_mean_F,
-							  infectious_mean_R,
-							  hosp_mean_F,
-							  hosp_mean_R,
-							  funeral_mean,
-							  
-							  delta,
-							  deltaH,
-							  pH,
-							  pHw,
-									
-							  nE, nI, nH, nF);
-	
-	// Only first location has initial cases
-	vector<unsigned long> vinitI(nLocation,0);
-	vector<unsigned long> vinitIw(nLocation,0);
-	vector<unsigned long> vinitSw(nLocation,initSw);
-	vinitI[0] = initI;
-	vinitIw[0] = initIw;
-	
-	int seed = 1234;
-	vector<spatialSim> spSim_mc = MC_run_tauLeap_spatial_sim(spSim,
-															 mc_iter,
-															 horizon,
-															 timeStepTauleap,
-															 vinitI, vinitIw,vinitSw,
-															 calc_WIW_Re,
-															 seed, silentMode);
-	
-	// DEBUG
-	
-	for(int i=0;i<spSim_mc.size();i++)
-	{
-		cout<<"First time case MC"<<i<<":";
-		displayVector(spSim_mc[i].get_time_firstCase());
-		cout<<"doublecheck:"<<endl;
-		cout << spSim_mc[i].get_simulator(1).get_time_firstCase()<<endl;
+	if(do_multiLocation){
 		
-		cout<<"cumMovements: "<< spSim_mc[i].get_cumMovements()<<endl;
-	}
-	
-	
-	//
+		// ==== SPATIAL SIMULATION ====
+		
+		unsigned int nLocation = 3;
+		vector<unsigned long> popLocations;
+		for(int i =0; i<nLocation; i++) popLocations.push_back(500*(i+1));
+		
+		Matrix distLoc(3,3);
+		distLoc(0,1) = 1.0;
+		distLoc(0,2) = 2.3;
+		distLoc(1,2) = 2;
+		distLoc.display();
+		vector<double> distLoc_vec = distLoc.melt();
+		
+		vector<double> vbeta_IS(nLocation,beta_IS);
+		vector<double> vbeta_FS(nLocation,beta_FS);
+		vector<double> vbeta_IwS(nLocation,beta_IwS);
+		vector<double> vbeta_ISw(nLocation,beta_ISw);
+		vector<double> vbeta_FSw(nLocation,beta_FSw);
+		vector<double> vbeta_IwSw(nLocation,beta_IwSw);
+		vector<double> vbeta_HSw(nLocation,beta_HSw);
+		
+		vector<double> migrationParams;
+		migrationParams.push_back(0.001);
+		migrationParams.push_back(5.0);
+		
+		spatialSim spSim(nLocation, popLocations, distLoc_vec, migrationParams);
+		
+		
+		spSim.initialize_all_simulators(vbeta_IS,
+										vbeta_FS,
+										vbeta_IwS,
+										vbeta_ISw,
+										vbeta_FSw,
+										vbeta_IwSw,
+										vbeta_HSw,
+										
+										latent_mean,
+										infectious_mean_H,
+										infectious_mean_Hw,
+										infectious_mean_F,
+										infectious_mean_R,
+										hosp_mean_F,
+										hosp_mean_R,
+										funeral_mean,
+										
+										delta,
+										deltaH,
+										pH,
+										pHw,
+										
+										nE, nI, nH, nF,
+										GIbck_sampleTime);
+		
+		// Only first location has initial cases
+		vector<unsigned long> vinitI(nLocation,0);
+		vector<unsigned long> vinitIw(nLocation,0);
+		vector<unsigned long> vinitSw(nLocation,initSw);
+		vinitI[0] = initI;
+		vinitIw[0] = initIw;
+		
+		int seed = 1234;
+		vector<spatialSim> spSim_mc = MC_run_tauLeap_spatial_sim(spSim,
+																 mc_iter,
+																 horizon,
+																 timeStepTauleap,
+																 vinitI, vinitIw,vinitSw,
+																 calc_WIW_Re,
+																 seed, silentMode);
+		
+		// DEBUG
+		
+		for(int i=0;i<spSim_mc.size();i++)
+		{
+			//		cout<<"First time case MC"<<i<<":";
+			//		displayVector(spSim_mc[i].get_time_firstCase());
+			//		cout<<"doublecheck:"<<endl;
+			//		cout << spSim_mc[i].get_simulator(1).get_time_firstCase()<<endl;
+			//		cout<<"cumMovements: "<< spSim_mc[i].get_cumMovements()<<endl;
+			
+			for(int l=0; l<nLocation; l++){
+				cout <<endl<<"loc="<< l <<" GIs at time "<< spSim_mc[i].get_simulator(l).get_GIbck_times(0)<<" :";
+				displayVector(spSim_mc[i].get_simulator(l).get_GIbck_gi(0));
+			}
+		}
+		
+	} // end do_multiLocation
+
 	
 	cout<<endl<<"--- E N D ---"<<endl;
 	
