@@ -10,7 +10,8 @@
 #include "globalVar.h"
 
 
-simulator initialize_simulation(double	beta_IS,
+simulator initialize_simulation(string	betaType,
+								double	beta_IS,
 								double	beta_FS,
 								double	beta_IwS,
 								double	beta_ISw,
@@ -37,6 +38,7 @@ simulator initialize_simulation(double	beta_IS,
 								unsigned int nH,
 								unsigned int nF,
 								double GIbck_sampleTime,
+								bool singleLocation,
 								unsigned long firstID
 								){
 	
@@ -70,7 +72,8 @@ simulator initialize_simulation(double	beta_IS,
 	for (int i=0; i<nH; i++) h_R[i] = h0_R * nH;
 	for (int i=0; i<nF; i++) f[i]=f0 * nF;
 	
-	simulator SIM(beta_IS,
+	simulator SIM(betaType,
+				  beta_IS,
 				  beta_FS,
 				  beta_IwS,
 				  beta_ISw,
@@ -86,7 +89,8 @@ simulator initialize_simulation(double	beta_IS,
 				  popSize,
 				  nE, nI, nH, nF,
 				  firstID,
-				  GIbck_sampleTime);
+				  GIbck_sampleTime,
+				  singleLocation);
 	
 	return SIM;
 }

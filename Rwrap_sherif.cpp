@@ -35,6 +35,7 @@ List rcpp_sherif(List paramsSimul, List paramsModel) {
 	int nI						= paramsModel["nI"];
 	int nH						= paramsModel["nH"];
 	int nF						= paramsModel["nF"];
+	std::string	betaType			= paramsModel["betaType"];
 	double	beta_IS				= paramsModel["beta_IS"];
 	double	beta_FS				= paramsModel["beta_FS"];
 	double	beta_IwS			= paramsModel["beta_IwS"];
@@ -58,7 +59,12 @@ List rcpp_sherif(List paramsSimul, List paramsModel) {
 	
 	// === Simulations ===
 	
-	simulator SIM = initialize_simulation(beta_IS,
+	// Explictly confirms it's a single location:
+	// this will speed-up the execution.
+	bool singleLocation = true;
+	
+	simulator SIM = initialize_simulation(betaType,
+										  beta_IS,
 										  beta_FS,
 										  beta_IwS,
 										  beta_ISw,
@@ -81,7 +87,8 @@ List rcpp_sherif(List paramsSimul, List paramsModel) {
 										  pHw,
 										  popSize,
 										  nE, nI, nH, nF,
-										  timeIdxGI);
+										  timeIdxGI,
+										  singleLocation);
 	
 	vector<simulator> sim_mc = MC_run_tauLeap_sim(SIM,
 												  mc_iter,
@@ -174,6 +181,7 @@ List rcpp_sherif_spatial(List paramsSimul,
 	int nI						= paramsModel["nI"];
 	int nH						= paramsModel["nH"];
 	int nF						= paramsModel["nF"];
+	std::string	betaType			= paramsModel["betaType"];
 	vector<double>	beta_IS		= paramsModel["beta_IS"];
 	vector<double>	beta_FS		= paramsModel["beta_FS"];
 	vector<double>	beta_IwS	= paramsModel["beta_IwS"];
@@ -216,7 +224,8 @@ List rcpp_sherif_spatial(List paramsSimul,
 					 migrationParams);
 	
 	
-	spSim.initialize_all_simulators(beta_IS,
+	spSim.initialize_all_simulators(betaType,
+									beta_IS,
 							  beta_FS,
 							  beta_IwS,
 							  beta_ISw,

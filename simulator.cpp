@@ -9,7 +9,8 @@
 #include "simulator.h"
 
 
-simulator::simulator(double	beta_IS,
+simulator::simulator(string betaType,
+					 double	beta_IS,
 					 double	beta_FS,
 					 double	beta_IwS,
 					 double	beta_ISw,
@@ -34,19 +35,62 @@ simulator::simulator(double	beta_IS,
 					 unsigned int nH,
 					 unsigned int nF,
 					 unsigned long firstID,
-					 double GIbck_sampleTime
-)
+					 double GIbck_sampleTime,
+					 bool singleLocation
+					 )
 {
 	/// Constructs a simulator object
 	
-	_beta_IS = beta_IS;
-	_beta_FS = beta_FS;
-	_beta_IwS = beta_IwS;
-	_beta_ISw = beta_ISw;
-	_beta_FSw = beta_FSw;
-	_beta_IwSw = beta_IwSw;
-	_beta_HSw = beta_HSw;
-
+	bool betaTypeKnown = false;
+	
+	if(betaType=="standard"){
+		// In this case, standard interpretation
+		// of parameters
+		
+		betaTypeKnown = true;
+		_beta_IS = beta_IS;
+		_beta_FS = beta_FS;
+		_beta_IwS = beta_IwS;
+		_beta_ISw = beta_ISw;
+		_beta_FSw = beta_FSw;
+		_beta_IwSw = beta_IwSw;
+		_beta_HSw = beta_HSw;
+	}
+	
+	if(betaType=="reduced"){
+		// In this case, some betas are relative from one another
+		// in order to reduce the parameter space
+		//
+		// WARNING: some parameters are now interpreted
+		// as multiplicative factor!
+		// (TO DO: CHANGE THIS?)
+		
+		cout << " === W A R N I N G === "<< endl;
+		cout << " beta_IwS, beta_ISw and beta_IwSw are interpreted as multiplicative factor in front of beta_IS"<<endl;
+		cout << " beta_FSw is interpreted as multiplicative factor in front of beta_FS"<<endl;
+		cout << " =====================" << endl;
+		
+		betaTypeKnown = true;
+		
+		// infectious - susceptible
+		_beta_IS	= beta_IS;
+		_beta_IwS	= beta_IwS * _beta_IS;
+		_beta_ISw	= beta_ISw * _beta_IS;
+		_beta_IwSw	= beta_IwSw * _beta_IS;
+		
+		
+		// Funeral - susceptibles
+		_beta_FS	= beta_FS;
+		_beta_FSw	= beta_FSw * _beta_FS;
+		
+		// Hospitalized - susceptible HCW (like standard)
+		_beta_HSw	= beta_HSw;
+	}
+	
+	string errmsg = "Beta type ["+betaType+"] unknown!";
+	stopif(!betaTypeKnown,errmsg);
+	
+	
 	_sigma = sigma;
 	
 	_gamma_H = gamma_H;
@@ -78,6 +122,8 @@ simulator::simulator(double	beta_IS,
 		_indiv[i].create();
 		_indiv[i].set_ID(firstID+i);
 	}
+	
+	_singleLocation = singleLocation;
 }
 
 void simulator::displayPopulation(bool indivDetails){
@@ -169,8 +215,12 @@ unsigned long simulator::findIndivIdx(unsigned long ID){
 	/// Finds the index position of a given individual ID
 	/// in the vector of individuals of the simulation '_indiv'
 	
-	unsigned long res = 9E9;
+	// If only one location, then ID is the same as the
+	// position in the array of _indiv
+	if(_singleLocation) return ID;
 	
+	// If multi-locations, then must do a search :-(
+	unsigned long res = 9E9;
 	for (unsigned long i=0; i<_indiv.size(); i++) {
 		if (_indiv[i].get_ID()==ID) {
 			res = i;
@@ -254,7 +304,9 @@ double simulator::eventRate_progress_E(unsigned int i){
 	/// (stages from i='1' to '_nE-1')
 	
 	stopif(i>=_nE || i<=0, "index out of bounds");
-	unsigned long NEi = census_state(getState_E(i));
+//	unsigned long NEi = census_state(getState_E(i));
+
+	unsigned long NEi = _table_state_ID[getState_E(i)].size();
 	return _sigma[i-1]*NEi;
 }
 
@@ -265,7 +317,10 @@ double simulator::eventRate_progress_Ew(unsigned int i){
 	/// (stages from i='1' to '_nE-1')
 	
 	stopif(i>=_nE || i<=0, "index out of bounds");
-	return _sigma[i-1]*census_state(getState_Ew(i));
+
+	unsigned long NEi = _table_state_ID[getState_Ew(i)].size();
+	return _sigma[i-1]*NEi;
+	//return _sigma[i-1]*census_state(getState_Ew(i));
 }
 
 
@@ -274,7 +329,10 @@ double simulator::eventRate_infectOnset(){
 	
 	/// Rate on infectiousness onset (E->I)
 	
-	return _sigma[_nE-1]*census_state(getState_E(_nE));
+	unsigned long n = _table_state_ID[getState_E(_nE)].size();
+	return _sigma[_nE-1]*n;
+	
+	//return _sigma[_nE-1]*census_state(getState_E(_nE));
 }
 
 
@@ -283,7 +341,10 @@ double simulator::eventRate_infectOnset_HCW(){
 	
 	/// Rate on infectiousness onset (Ew->Iw)
 	
-	return _sigma[_nE-1]*census_state(getState_Ew(_nE));
+	unsigned long n = _table_state_ID[getState_Ew(_nE)].size();
+	return _sigma[_nE-1]*n;
+	
+	//return _sigma[_nE-1]*census_state(getState_Ew(_nE));
 }
 
 
@@ -295,7 +356,9 @@ double simulator::eventRate_progress_I(unsigned int i){
 	
 	stopif(i>=_nI || i<=0, "index out of bounds");
 	double gamma = _pH*_gamma_H[i-1] + (1-_pH)*(_delta*_gamma_F[i-1]+(1-_delta)*_gamma_R[i-1]);
-	return gamma*census_state(getState_I(i));
+	
+	return gamma*_table_state_ID[getState_I(i)].size();
+	//return gamma*census_state(getState_I(i));
 }
 
 
@@ -306,19 +369,21 @@ double simulator::eventRate_progress_Iw(unsigned int i){
 	
 	stopif(i>=_nI || i<=0, "index out of bounds");
 	double gamma = _pHw*_gamma_Hw[i-1] + (1-_pHw)*(_delta*_gamma_F[i-1]+(1-_delta)*_gamma_R[i-1]);
-	return gamma*census_state(getState_Iw(i));
+
+	return gamma*_table_state_ID[getState_Iw(i)].size();
+	//return gamma*census_state(getState_Iw(i));
 }
 
 double simulator::eventRate_hospital(){
 	/// Hospitalization event rate for general population
 	
-	return _pH * _gamma_H[_nI-1] * census_state(getState_I(_nI));
+	return _pH * _gamma_H[_nI-1] * _table_state_ID[getState_I(_nI)].size();
 }
 
 double simulator::eventRate_hospital_HCW(){
 	/// Hospitalization event rate for general population
 	
-	return _pHw * _gamma_Hw[_nI-1] * census_state(getState_Iw(_nI));
+	return _pHw * _gamma_Hw[_nI-1] * _table_state_ID[getState_Iw(_nI)].size();
 }
 
 
@@ -326,59 +391,59 @@ double simulator::eventRate_progress_H(unsigned int i){
 	/// Progression rate in hospitalization
 	
 	double h = _deltaH*_h_F[i-1] + (1-_deltaH)*_h_R[i-1];
-	return h * census_state(getState_H(i));
+	return h * _table_state_ID[getState_H(i)].size();
 }
 
 
 double simulator::eventRate_funeral_Hosp(){
 	/// Death rate when hospitalized
 	
-	return _deltaH*_h_F[_nH-1]*census_state(getState_H(_nH));
+	return _deltaH*_h_F[_nH-1]*_table_state_ID[getState_H(_nH)].size();
 }
 
 double simulator::eventRate_funeral_nonHosp(){
 	/// Death rate when hospitalized
 	
-	return (1-_pH)*_delta*_gamma_F[_nI-1]*census_state(getState_I(_nI));
+	return (1-_pH)*_delta*_gamma_F[_nI-1]*_table_state_ID[getState_I(_nI)].size();
 }
 
 
 double simulator::eventRate_funeral_nonHosp_HCW(){
 	/// Death rate when hospitalized
 	
-	return (1-_pHw)*_delta*_gamma_F[_nI-1]*census_state(getState_Iw(_nI));
+	return (1-_pHw)*_delta*_gamma_F[_nI-1]*_table_state_ID[getState_Iw(_nI)].size();
 }
 
 double simulator::eventRate_progress_F(unsigned int i){
 	/// Progression rate in funerals
 	
-	return _f[i-1]*census_state(getState_F(i));
+	return _f[i-1]*_table_state_ID[getState_F(i)].size();
 }
 
 
 double simulator::eventRate_recovery_I(){
 	/// Recovery rate of infectious non-hospitalized from general population
-
-	return (1-_delta)*(1-_pH)*_gamma_R[_nI-1]*census_state(getState_I(_nI));
+	
+	return (1-_delta)*(1-_pH)*_gamma_R[_nI-1]*_table_state_ID[getState_I(_nI)].size();
 }
 
 
 double simulator::eventRate_recovery_Iw(){
 	/// Recovery rate of infectious non-hospitalized from HCW
 	
-	return (1-_delta)*(1-_pHw)*_gamma_R[_nI-1]*census_state(getState_Iw(_nI));
+	return (1-_delta)*(1-_pHw)*_gamma_R[_nI-1]*_table_state_ID[getState_Iw(_nI)].size();
 }
 
 double simulator::eventRate_recovery_H(){
 	/// Recovery rate of hospitalized patients
 	
-	return (1-_deltaH)*_h_R[_nH-1]*census_state(getState_H(_nH));
+	return (1-_deltaH)*_h_R[_nH-1]*_table_state_ID[getState_H(_nH)].size();
 }
 
 double simulator::eventRate_deathBuried(){
 	/// Burial rate of dead after funerals
 	
-	return _f[_nF-1]*census_state(getState_F(_nF));
+	return _f[_nF-1]*_table_state_ID[getState_F(_nF)].size();
 }
 
 
@@ -405,10 +470,10 @@ double simulator::eventRate(string eventType, unsigned int i=0){
 	
 	if(eventType=="infectOnset")		rate = eventRate_infectOnset();
 	if(eventType=="infectOnset_HCW")	rate = eventRate_infectOnset_HCW();
-
+	
 	if(eventType=="hospital")			rate = eventRate_hospital();
 	if(eventType=="hospital_HCW")		rate = eventRate_hospital_HCW();
-
+	
 	if(eventType=="funeral_nonHosp_HCW")rate = eventRate_funeral_nonHosp_HCW();
 	if(eventType=="funeral_nonHosp")	rate = eventRate_funeral_nonHosp();
 	if(eventType=="funeral_Hosp")		rate = eventRate_funeral_Hosp();
@@ -416,9 +481,9 @@ double simulator::eventRate(string eventType, unsigned int i=0){
 	if(eventType=="recovery_I")			rate = eventRate_recovery_I();
 	if(eventType=="recovery_Iw")		rate = eventRate_recovery_Iw();
 	if(eventType=="recovery_H")			rate = eventRate_recovery_H();
-
+	
 	if(eventType=="deathBuried")		rate = eventRate_deathBuried();
-
+	
 	return rate;
 }
 
@@ -493,7 +558,7 @@ void simulator::clean_start()
 	_incidence.clear();
 	_incidence_hcw.clear();
 	
-
+	
 	_count_S_vec.clear();
 	_count_Sw_vec.clear();
 	_count_E_vec.clear();
@@ -512,7 +577,7 @@ void simulator::clean_start()
 	
 	_GIbck.clear();
 	_GIbck_times.clear();
-
+	
 	for(int i=0;i<_indiv.size(); i++) _indiv[i].create();
 }
 
@@ -550,7 +615,7 @@ void simulator::initialize(unsigned long initI,
 		_indiv[initI+initIw+i].set_isHCW(true);
 		_indiv[initI+initIw+i].set_timeDiseaseAcquisition(0.0);
 	}
-
+	
 	
 	// intialize counts
 	_count_S = _popSize - initI - initIw - initSw;
@@ -563,11 +628,11 @@ void simulator::initialize(unsigned long initI,
 	
 	_fatalCum_genPop = 0;
 	_fatalCum_hcw = 0;
-
+	
 	_count_Sw = initSw;
 	_count_Ew = 0;
 	_count_Iw = initIw;
-
+	
 	
 	_eventCount_IS = 0;
 	_eventCount_FS = 0;
@@ -576,7 +641,7 @@ void simulator::initialize(unsigned long initI,
 	_eventCount_FSw = 0;
 	_eventCount_IwSw = 0;
 	_eventCount_HSw = 0;
-
+	
 	
 	// Initialization
 	
@@ -723,7 +788,7 @@ bool simulator::identify_infector_infectee(string eventType,
 		eventTypeKnown = true;
 		_eventCount_HSw++;
 	}
-
+	
 	// If event type not implemented here, stop.
 	string errmsg = "event type "+ eventType + "unknown!";
 	stopif(!eventTypeKnown,errmsg);
@@ -735,7 +800,7 @@ bool simulator::identify_infector_infectee(string eventType,
 	
 	if(x.size()==0) _count_events_sim_ignored++; // cout << "Warning: no infectee exists for event type "+eventType;
 	if(x_I.size()==0) _count_events_sim_ignored++; //cout << "Warning:no infector exists for event type "+eventType;
-
+	
 	bool success = (x.size()>0 && x_I.size()>0);
 	
 	if(success){
@@ -861,7 +926,7 @@ string simulator::identify_genuineStateChange(string eventType, double timeEvent
 		nextState = getState_H(1);
 		eventTypeKnown = true;
 	}
-
+	
 	if(eventType=="funeral_nonHosp") {
 		currState = getState_I(_nI);
 		nextState = getState_F(1);
@@ -1075,7 +1140,7 @@ void simulator::run_tauLeap(double horizon,
 	
 	initialize(initI, initIw, initSw);
 	double t = 0.0;
-
+	
 	while ( t<horizon && !all_in_R_or_D() )
 	{
 		double					time_event = t+timestepSize;
@@ -1087,7 +1152,7 @@ void simulator::run_tauLeap(double horizon,
 			
 			string eventType = ENC._event_label[ev];
 			bool isProgressEvent = is_in_string(eventType, "progress");
-		
+			
 			// If not a "progress" event type, then action
 			// on the event as many times as the number
 			// that was drawn from the Poisson in "drawNumberEvents_tauLeap"
@@ -1099,25 +1164,25 @@ void simulator::run_tauLeap(double horizon,
 			// each of the box-car compartments:
 			if(isProgressEvent){
 				for(int k=0;k<ENC._n_event[ev];k++)
-					action_event(eventType,time_event,ENC._event_sublabel[ev]); 
+					action_event(eventType,time_event,ENC._event_sublabel[ev]);
 			}
-
+			
 			// integrity check (optional, switch off for performance)
 			//check_popSize();
 			//check_popSize_I();
 		}
 		
 		// update backward GI
-
+		
 		// NEW STUFF 2015-09-24 (<-- delete this comment when sure OK)
 		if(fabs(t-get_GIbck_sampleTime())<timestepSize/2.0) update_GIbck(t);
-
+		
 		// DELETE (?) ----------------------------------------
 		// (not at all event dates b/c of memory cost)
-//		int tt = round(t);
-//		if(fabs(t-tt)<0.0001) {
-//			update_GIbck(t);
-//		}
+		//		int tt = round(t);
+		//		if(fabs(t-tt)<0.0001) {
+		//			update_GIbck(t);
+		//		}
 		// --------------------------------------------------
 		
 		
@@ -1210,10 +1275,10 @@ void simulator::calc_Reff_final()
 
 
 void simulator::update_GIbck(double t){
-
+	
 	/// Update the backward generation interval matrix _GIbck
 	/// at time t
-
+	
 	vector<double> gi;
 	vector<double> timeAcqInfectee;
 	
@@ -1303,7 +1368,7 @@ void simulator::update_incidences(){
 	// update cumulative incidence
 	_cumIncidence.push_back(_currCumInc);
 	_cumIncidence_hcw.push_back(_currCumInc_hcw);
-
+	
 	// update period incidence
 	unsigned long n = _cumIncidence.size();
 	_incidence.push_back(_cumIncidence[n-1]-_cumIncidence[n-2]);
@@ -1373,7 +1438,7 @@ vector<unsigned long> simulator::census_ID(unsigned int a)
 	return res;
 }
 
-	
+
 vector<unsigned long> simulator::census_ID(unsigned int a, unsigned int b)
 {
 	/// Retrieve IDs of all individuals between state 'a'and 'b' (a<=b)
@@ -1409,7 +1474,7 @@ vector<unsigned long> simulator::census_table_state_ID(unsigned int a, unsigned 
 
 
 bool simulator::is_indiv_hcw(unsigned long ID){
-
+	
 	/// Is this individual a HCW?
 	
 	bool res = false;
@@ -1430,7 +1495,7 @@ bool simulator::is_indiv_susceptible(unsigned long ID){
 	
 	bool res = true;
 	if( _indiv[idx].get_state()!=s &&
-	    _indiv[idx].get_state()!=sw)
+	   _indiv[idx].get_state()!=sw)
 		res = false;
 	return res;
 }
@@ -1443,10 +1508,10 @@ void	simulator::add_indiv(unsigned long ID,
 							 unsigned long infectorID,
 							 double GIbck,
 							 vector<double> GIfwd){
-
+	
 	/// Add a new individual to the population
 	/// (typically coming from migrations)
-
+	
 	
 	individual tmp;
 	tmp.set_state(state);
@@ -1458,7 +1523,7 @@ void	simulator::add_indiv(unsigned long ID,
 	tmp.set_ID(ID);
 	
 	_indiv.push_back(tmp);
-
+	
 	// update simulator following individual addition:
 	_popSize++;
 	_table_state_ID[state].push_back(ID);
@@ -1507,7 +1572,6 @@ void simulator::remove_indiv(unsigned long ID){
 	if (getState_I(1)<=state && state <= getState_I(_nI)) {_count_I--; found = true;}
 	if (getState_Iw(1)<=state && state <= getState_Iw(_nI)) {_count_Iw--; found = true;}
 	stopif(!found, "individual's state not implemented!");
-	
 }
 
 
@@ -1630,9 +1694,9 @@ void simulator::display_eventCounts(){
 	cout << "Infection events counts:" <<endl;
 	
 	unsigned long total =	_eventCount_IS+_eventCount_FS+
-							_eventCount_IwS+_eventCount_ISw+
-							_eventCount_FSw+_eventCount_IwSw+
-							_eventCount_HSw;
+	_eventCount_IwS+_eventCount_ISw+
+	_eventCount_FSw+_eventCount_IwSw+
+	_eventCount_HSw;
 	
 	cout << "I -> S:\t"<<_eventCount_IS<<" ("<< round((double)(_eventCount_IS)/total*100) <<"%)"<<endl;
 	cout << "F -> S:\t"<<_eventCount_FS<<" ("<< round((double)(_eventCount_FS)/total*100) <<"%)"<<endl;
@@ -1649,7 +1713,7 @@ void simulator::display_eventCounts(){
 void simulator::save_GIbck(string filename){
 	/// Save the temporal evolution of
 	/// backward GI to a file
-
+	
 	ofstream f(filename);
 	
 	for (int i=0; i<_indiv.size();  i++){
@@ -1670,36 +1734,36 @@ void simulator::save_GIfwd(string filename){
 	/// Save the temporal evolution of
 	/// forward GI to a file
 	
-//	ofstream f(filename);
-//	
-//	double R0 = _beta/_gamma[0]*_nI;
-//	// make sure the max length
-//	// of GIfwd is sufficient (for all MC iters!)
-//	unsigned long gimaxsize = 20*(1+R0);
-//	
-//	for (int i=0; i<_popSize;  i++)
-//		gimaxsize = max(gimaxsize,_indiv[i].get_GIfwd().size());
-//	
-//	// Now save all GI (even if there's not as much as 'gimaxsize')
-//	
-//	for (int i=0; i<_popSize;  i++)
-//	{
-//		double tmp = _indiv[i].get_timeDiseaseAcquisition();
-//		unsigned long ntransm = _indiv[i].get_GIfwd().size();
-//		
-//		if(ntransm>0){
-//			f << tmp <<",";
-//			
-//			for(int k=0;k<gimaxsize;k++)
-//			{
-//				if(k<ntransm) f<<_indiv[i].get_GIfwd()[k];
-//				if(k>=ntransm) f<<"";
-//				
-//				if(k<gimaxsize-1) f<<",";
-//			}
-//			f<<endl;
-//		}
-//	}
+	//	ofstream f(filename);
+	//
+	//	double R0 = _beta/_gamma[0]*_nI;
+	//	// make sure the max length
+	//	// of GIfwd is sufficient (for all MC iters!)
+	//	unsigned long gimaxsize = 20*(1+R0);
+	//
+	//	for (int i=0; i<_popSize;  i++)
+	//		gimaxsize = max(gimaxsize,_indiv[i].get_GIfwd().size());
+	//
+	//	// Now save all GI (even if there's not as much as 'gimaxsize')
+	//
+	//	for (int i=0; i<_popSize;  i++)
+	//	{
+	//		double tmp = _indiv[i].get_timeDiseaseAcquisition();
+	//		unsigned long ntransm = _indiv[i].get_GIfwd().size();
+	//
+	//		if(ntransm>0){
+	//			f << tmp <<",";
+	//
+	//			for(int k=0;k<gimaxsize;k++)
+	//			{
+	//				if(k<ntransm) f<<_indiv[i].get_GIfwd()[k];
+	//				if(k>=ntransm) f<<"";
+	//
+	//				if(k<gimaxsize-1) f<<",";
+	//			}
+	//			f<<endl;
+	//		}
+	//	}
 }
 
 

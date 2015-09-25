@@ -55,6 +55,7 @@ int main(int argc, const char * argv[]) {
 	int nH						= getParameterFromFile("nH", fileparam_model);
 	int nF						= getParameterFromFile("nF", fileparam_model);
 	
+	string	betaType			= getParameterFromFile_string("betaType", fileparam_model);
 	double	beta_IS				= getParameterFromFile("beta_IS", fileparam_model);
 	double	beta_FS				= getParameterFromFile("beta_FS", fileparam_model);
 	double	beta_IwS			= getParameterFromFile("beta_IwS", fileparam_model);
@@ -94,9 +95,11 @@ int main(int argc, const char * argv[]) {
 	if(do_singleLocation){
 		
 		// ==== SINGLE PATCH SIMULATION ====
-
+		
+		bool singleLocation = true;
 		unsigned long firstID = 0;
-		simulator SIM = initialize_simulation(beta_IS,
+		simulator SIM = initialize_simulation(betaType,
+											  beta_IS,
 											  beta_FS,
 											  beta_IwS,
 											  beta_ISw,
@@ -120,6 +123,7 @@ int main(int argc, const char * argv[]) {
 											  popSize,
 											  nE, nI, nH, nF,
 											  GIbck_sampleTime,
+											  singleLocation,
 											  firstID);
 		
 		// Choose if execution outputs to files
@@ -179,7 +183,8 @@ int main(int argc, const char * argv[]) {
 		spatialSim spSim(nLocation, popLocations, distLoc_vec, migrationParams);
 		
 		
-		spSim.initialize_all_simulators(vbeta_IS,
+		spSim.initialize_all_simulators(betaType,
+										vbeta_IS,
 										vbeta_FS,
 										vbeta_IwS,
 										vbeta_ISw,
