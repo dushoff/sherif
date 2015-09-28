@@ -15,17 +15,17 @@ ms = ../makestuff
 
 ##################################################################
 
-# compiler.mk is intended to be a local file; it uses clang by default, but you can just edit and save it on any particular machine. Don't add it to sources
+# Old C stuff that we may not need
+Sources += exe.mk
 
--include compiler.mk
-compiler.mk:
-	/bin/cp clang.mk $@
+# compiler.mk is intended to be a local file; it uses clang by default, but you can just edit and save it on any particular machine. Don't add it to sources
 
 # Add your own compiler makefile to this list to share it between machines
 Sources += clang.mk gcc.mk
 
-# Old C stuff that we may not need
-Sources += exe.mk
+-include compiler.mk
+compiler.mk:
+	/bin/cp clang.mk $@
 
 ######################################################################
 
