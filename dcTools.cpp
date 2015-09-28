@@ -497,10 +497,6 @@ string getParameterFromFile_string(string paramName, string fileName)
 	return res;
 }
 
-
-
-
-
 vector<string> getFirstLineHeaders( istream& ins )
 {
 	// READ THE FIRST LINE (HEADERS)
