@@ -13,7 +13,8 @@
 #include "simulator.h"
 #include "spatialSim.h"
 
-simulator initialize_simulation(double	beta_IS,
+simulator initialize_simulation(string	betaType,
+								double	beta_IS,
 								double	beta_FS,
 								double	beta_IwS,
 								double	beta_ISw,
@@ -40,6 +41,7 @@ simulator initialize_simulation(double	beta_IS,
 								unsigned int nH,
 								unsigned int nF,
 								double GIbck_sampleTime,
+								bool singleLocation,
 								unsigned long firstID=0
 								);
 

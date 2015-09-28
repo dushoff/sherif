@@ -43,7 +43,8 @@ public:
 	
 	void displayInfo();
 	
-	void initialize_all_simulators(vector<double>	beta_IS,
+	void initialize_all_simulators(string			betaType,
+								   vector<double>	beta_IS,
 								   vector<double>	beta_FS,
 								   vector<double>	beta_IwS,
 								   vector<double>	beta_ISw,

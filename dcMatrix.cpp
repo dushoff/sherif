@@ -63,8 +63,8 @@ double & Matrix::operator () (unsigned long i,unsigned long j)
 	/// top left element is M(0,0)
 	/// bottom right element is M(n-1,m-1)
 	
-	if(i>=nbRows) {cout<<"ERROR: Matrix row requested is too large (i="<<i<<"; nbRows="<<nbRows<<")"<<endl; exit(1);}
-	if(j>=nbCols) {cout<<"ERROR: Matrix column requested is too large (j="<<j<<"; nbCols="<<nbCols<<")"<<endl; exit(1);}
+	if(i>=nbRows) {cerr<<"ERROR: Matrix row requested is too large (i="<<i<<"; nbRows="<<nbRows<<")"<<endl; exit(1);}
+	if(j>=nbCols) {cerr<<"ERROR: Matrix column requested is too large (j="<<j<<"; nbCols="<<nbCols<<")"<<endl; exit(1);}
     
     return val[nbCols*i+j];
 }
@@ -158,7 +158,7 @@ void Matrix::FromFile_Rows(string fileName, unsigned long nrow)
 	
 	if (!thefile)
 	{
-		cout<<endl<<" ERROR [FromFile_Rows]: This file is not found: "<<fileName<<endl;
+		cerr<<endl<<" ERROR [FromFile_Rows]: This file is not found: "<<fileName<<endl;
 		exit(1);
 	}
 	
@@ -180,7 +180,7 @@ void Matrix::FromFile_Rows(string fileName, unsigned long nrow)
 	
 	if (n%nrow != 0 )
 	{
-		cout << endl << "ERROR [FromFile_Rows]: number of rows ("<< nrow<<") does not divide number of data("<<n<<")!"<<endl;
+		cerr << endl << "ERROR [FromFile_Rows]: number of rows ("<< nrow<<") does not divide number of data("<<n<<")!"<<endl;
 		exit(1);
 	}
 
@@ -234,8 +234,8 @@ void Matrix::WriteToFileCSV(string fileName, vector<string> headers)
 	
 	if (nbCols!=headers.size())
 	{
-		cout << "ERROR -- WriteToFileCSV: Headers size ("<<headers.size()<<") does not match Matrix columns size ("<<nbCols<<")!"<<endl;
-		cout << "Cannot write matrix to this file: "<<fileName<<endl;
+		cerr << "ERROR -- WriteToFileCSV: Headers size ("<<headers.size()<<") does not match Matrix columns size ("<<nbCols<<")!"<<endl;
+		cerr << "Cannot write matrix to this file: "<<fileName<<endl;
 		exit(1);
 	}
 	
@@ -291,7 +291,7 @@ void Matrix::addRowVector(vector<double> v)
 		
 		if(nbCols != v.size())
 		{
-			cout<<"CAN'T ADD ROW VECTOR TO MATRIX, SIZES DO NOT MATCH: Matrix cols = "<< nbCols
+			cerr<<"CAN'T ADD ROW VECTOR TO MATRIX, SIZES DO NOT MATCH: Matrix cols = "<< nbCols
 			<<" vs Vector size = "<< v.size() << endl;
 			exit(1);
 		}
@@ -364,7 +364,7 @@ void Matrix::addColVector(vector<double> v)
 	
     if(nrow != v.size() && nrow>0)
 	{
-		cout<<"CAN'T ADD Col VECTOR TO MATRIX, SIZES DO NOT MATCH: Matrix rows = "<<nrow
+		cerr<<"CAN'T ADD Col VECTOR TO MATRIX, SIZES DO NOT MATCH: Matrix rows = "<<nrow
 		<<" vs Vector size = "<<v.size()<<endl;
 		exit(1);
 	}
@@ -413,8 +413,8 @@ vector<double> Matrix::extractColumn(unsigned long j_col)
 	/// first column is j_col=0
 	
 	if (j_col >= nbCols) {
-		cout << endl << " ERROR [Matrix::extractColumn]:cannot extract col("<< j_col;
-		cout << ") greater than size (0--"<< nbCols-1<< ")!"<<endl;
+		cerr << endl << " ERROR [Matrix::extractColumn]:cannot extract col("<< j_col;
+		cerr << ") greater than size (0--"<< nbCols-1<< ")!"<<endl;
 		exit(1);
 	}
 	
@@ -431,8 +431,8 @@ vector<double> Matrix::extractRow(unsigned long i_row)
 	/// first column is i_row=0
 	
 	if (i_row >= nbRows) {
-		cout << endl << " ERROR [Matrix::extractRow]:cannot extract row("<< i_row;
-		cout << ") greater than size (0--"<< nbRows-1<< ")!"<<endl;
+		cerr << endl << " ERROR [Matrix::extractRow]:cannot extract row("<< i_row;
+		cerr << ") greater than size (0--"<< nbRows-1<< ")!"<<endl;
 		exit(1);
 	}
 	
@@ -451,7 +451,7 @@ Matrix Matrix::rowBindMatrix(Matrix A, Matrix B){
 	/// A is on top of B
 	
 	if(A.getNbCols()!= B.getNbCols()) {
-		cout<<"Cannot row bind matrices with different column size" << endl;
+		cerr<<"Cannot row bind matrices with different column size" << endl;
 		exit(1);
 	}
 	
@@ -466,8 +466,8 @@ Matrix Matrix::rowBindMatrix(Matrix A, Matrix B){
 vector<double>	Matrix::extractRow_cond_minElement(unsigned long j_col)
 {
 	if (j_col >= nbCols) {
-		cout << endl << " ERROR [Matrix::extractRow_cond_minElement]:cannot extract row("<< j_col;
-		cout << ") greater than size (0--"<< nbCols-1<< ")!"<<endl;
+		cerr << endl << " ERROR [Matrix::extractRow_cond_minElement]:cannot extract row("<< j_col;
+		cerr << ") greater than size (0--"<< nbCols-1<< ")!"<<endl;
 		exit(1);
 	}
 	
@@ -640,7 +640,7 @@ Matrix Matrix::getMinor(unsigned long row, unsigned long col)
 {
 	if (nbCols!=nbRows)
 	{
-		cout << endl<< "ERROR [Matrix::getMinor] : non square matrix" <<endl;
+		cerr << endl<< "ERROR [Matrix::getMinor] : non square matrix" <<endl;
 		exit(1);
 	}
 	
@@ -678,7 +678,7 @@ Matrix Matrix::inverse()
 {	
 	if (nbRows!=nbCols)
 	{
-		cout << "ERROR [Matrix::inverse] : cannot inverse a non-square matrix!"<<endl;
+		cerr << "ERROR [Matrix::inverse] : cannot inverse a non-square matrix!"<<endl;
 		exit(1);
 	}
 	
@@ -697,7 +697,7 @@ Matrix Matrix::inverse()
 	
 	if (det==0)
 	{
-		cout << "ERROR [Matrix::inverse] : cannot inverse matrix (determinant	=0)!"<<endl;
+		cerr << "ERROR [Matrix::inverse] : cannot inverse matrix (determinant	=0)!"<<endl;
 		exit(1);
 	}
 	
@@ -740,12 +740,12 @@ Matrix Matrix::inverse()
 Matrix Matrix::Cholesky()
 {				
     if(nbCols!=nbRows) 		
-    { cout<<"Cholesky: non square Matrix !"<<endl;
+    { cerr<<"Cholesky: non square Matrix !"<<endl;
         exit(1);
     }
     
     if( ! this->isSymetric() ) 
-    {  cout<<"Cholesky: non symetric Matrix !"<<endl;
+    {  cerr<<"Cholesky: non symetric Matrix !"<<endl;
         exit(1);
     }
 	
@@ -973,7 +973,7 @@ Matrix Id(unsigned long nCol)
 Matrix power(Matrix A,unsigned long nCol)
 {
     if (A.nbCols!=A.nbRows)
-    {cout<<"Power over non square matrix impossible!"<<endl;
+    {cerr<<"Power over non square matrix impossible!"<<endl;
         exit(1);}
     else
     {
@@ -987,10 +987,10 @@ Matrix power(Matrix A,unsigned long nCol)
 Matrix cholesky(Matrix A)	//renvoi la Matrix triangul L tq:
 {				//si A symetrique,carre
     if(A.nbCols!=A.nbRows) 		//L*transpo(L)=A
-    { cout<<"Cholesky(non memb): non square Matrix !"<<endl;
+    { cerr<<"Cholesky(non memb): non square Matrix !"<<endl;
         exit(1);}
     if(!test_sym(A)) 
-    {  cout<<"Cholesky(non memb): non symetric Matrix !"<<endl;
+    {  cerr<<"Cholesky(non memb): non symetric Matrix !"<<endl;
         exit(1);
     }
 	
@@ -1031,7 +1031,7 @@ double distance_Matrix(Matrix A, Matrix B, double power)
 {
 	if (!same_size(A,B))
 	{
-		cout << "ERROR [distance_Matrix]: matrix not the same size!"<<endl;
+		cerr << "ERROR [distance_Matrix]: matrix not the same size!"<<endl;
 		exit(1);
 	}
 	
@@ -1052,7 +1052,7 @@ Matrix rowBind(Matrix A, Matrix B)
 {
 	if (A.getNbCols()!=B.getNbCols())
 	{
-		cout << "ERROR [rowBind]: matrix not the same column size!"<<endl;
+		cerr << "ERROR [rowBind]: matrix not the same column size!"<<endl;
 		exit(1);
 	}
 	

@@ -34,7 +34,8 @@ spatialSim::spatialSim(unsigned int nLocations,
 }
 
 
-void spatialSim::initialize_all_simulators(vector<double>	beta_IS,
+void spatialSim::initialize_all_simulators(string			betaType,
+										   vector<double>	beta_IS,
 										   vector<double>	beta_FS,
 										   vector<double>	beta_IwS,
 										   vector<double>	beta_ISw,
@@ -78,9 +79,11 @@ void spatialSim::initialize_all_simulators(vector<double>	beta_IS,
 	_simulator.resize(_nLocations);
 	unsigned long firstID = 0;
 	
+	bool singleLocation = false;
 	
 	for(int i=0; i<_nLocations; i++){
-		_simulator[i] = initialize_simulation(beta_IS[i], beta_FS[i], beta_IwS[i],
+		_simulator[i] = initialize_simulation(betaType,
+											  beta_IS[i], beta_FS[i], beta_IwS[i],
 											  beta_ISw[i], beta_FSw[i], beta_IwSw[i],
 											  beta_HSw[i],
 											  latent_mean,
@@ -96,6 +99,7 @@ void spatialSim::initialize_all_simulators(vector<double>	beta_IS,
 											  _popLocations[i],
 											  nE, nI, nH, nF,
 											  GIbck_sampleTime,
+											  singleLocation,
 											  firstID);
 		firstID += _popLocations[i];
 		

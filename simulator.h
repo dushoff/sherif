@@ -20,12 +20,24 @@ class simulator
 {
 	friend class spatialSim;
 	
+	
+	// Whether this simulation will be perfomed
+	// for a single location or will be part
+	// of multi-locations simulation:
+	bool	_singleLocation;
+	// Explanation: If single location, then code can speed-up execution
+	// in finding where individuals are stored based
+	// on their ID (no need for a search in the population).
+	// But search needed in multi-location because individuals can
+	// migrate b/w locations.
+	// Note: it is automatically set to 'false' when using class 'spatialSim'
+	
+	// Individuals of the simulated population:
 	vector<individual>	_indiv;
-
 	
 	// This table stores, at the current simulation time,
 	// the IDs for each state.
-	// It speeds up the search of the ID of an
+	// It speeds-up the search of the ID of an
 	// individual for a given state.
 	vector< vector<unsigned long> > _table_state_ID;
 	
@@ -272,7 +284,8 @@ public:
 	
 	simulator(){};
 	
-	simulator(double	beta_IS,
+	simulator(string	betaType,    // <--- How the parameters beta_xy have to be understood
+			  double	beta_IS,
 			  double	beta_FS,
 			  double	beta_IwS,
 			  double	beta_ISw,
@@ -297,7 +310,8 @@ public:
 			  unsigned int nH,
 			  unsigned int nF,
 			  unsigned long firstID,
-			  double GIbck_sampleTime);
+			  double GIbck_sampleTime,
+			  bool singleLocation);
 	
 	
 	void	initialize(unsigned long initSw,
