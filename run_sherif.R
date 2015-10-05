@@ -19,10 +19,10 @@ t0 <- as.numeric(Sys.time())
 path.sherif.lib <- "./lib"
 
 library(sherif, lib.loc = path.sherif.lib)
-
-
 source("run_sherif_FCT.R")
 source("./Calibration/loadParam_FCT.R")
+
+try(system("mkdir NIH_format",intern = F),silent = TRUE)
 
 ### Load simulation parameters
 ###
