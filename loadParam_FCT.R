@@ -14,7 +14,11 @@ loadParam <- function(filename){
 	prm$name <- as.character(prm$name)
 	prm.model <- list()
 	for(i in 1:nrow(prm)){
-		assign(as.character(prm$name[i]),prm$value[i])
+		name.i <- as.character(prm$name[i])
+		val.i <- ifelse(name.i=="betaType",
+						as.character(prm$value[i]),
+						as.numeric(as.character(prm$value[i])))
+		assign(name.i,val.i)
 		prm.model[[prm$name[i]]] <- get(prm$name[i])
 	}	
 	return(prm.model)
@@ -24,27 +28,24 @@ loadParam <- function(filename){
 loadSpatialParam <- function(){
 	
 	### READ ALL SPATIAL PARAMETERS 
-	###
 	
 	res <- list()
 	
-	# number of spatial locations:
-	res[["nLocations"]] <- as.numeric(read.csv("nLocations.csv",header=FALSE))
-	
 	# Population size in each locations:
-	res[["popLocations"]] <- as.numeric(read.csv("popLocations.csv",header=FALSE)[,1])
+	res[["popLocations"]] <- as.numeric(read.csv(paste0(folder,"popLocations.csv"),header=FALSE)[,1])
+	
+	# number of spatial locations:
+	res[["nLocations"]] <- length(res[["popLocations"]])
 	
 	# Distance between locations:
-	M <- as.matrix(read.csv("distLocations.csv",header=FALSE))
+	M <- as.matrix(read.csv(paste0(folder,"distLocations.csv"),header=FALSE))
 	res[["distLocations"]] <- as.numeric(t(M))
 	
 	# Initial number of individuals in I, Iw and Sw:
-	A <- read.csv("initLocations.csv",header=TRUE)
+	A <- read.csv(paste0(folder,"initLocations.csv"),header=TRUE)
 	res[["init_I1"]] <- A[,1]
 	res[["init_Iw1"]] <- A[,2]
 	res[["init_Sw1"]] <- A[,3]
-	
-
 	
 	# Integrity checks
 	stopifnot(res[["nLocations"]]==length(res[["popLocations"]]))
