@@ -22,6 +22,7 @@ commit.txt
 *.rd*
 
 NIH_format/*
+NIH_example_dir/*
 lib/*
 *sherif/*
 sherif.Rcheck*
