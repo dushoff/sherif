@@ -13,6 +13,16 @@
 path.sherif.lib <- "./lib"
 library(sherif, lib.loc = path.sherif.lib)
 
+### Utils functions
+source("sherif_test_FCT.R")
+
+
+######################
+###                ###
+###   PARAMETERS   ###
+###                ###
+######################
+
 
 ### Set simulation parameters
 ###
@@ -24,7 +34,8 @@ param.simul <- list(horizon = 30,  # <-- when the simulations stop
 					timeIdxGI = 25, # <-- time when GI is retrieved from simulations
 					silentMode = 1)  # <-- silent = no debug messages displayed while running
 
-### Set model parameters (see documentation for definitions)
+### Set model parameters 
+### (see documentation for input parameter definitions)
 ###
 param.model <- list(popSize = 2000,
 					init_I1 = 5,  # <-- initial number of infectious individuals
@@ -56,17 +67,55 @@ param.model <- list(popSize = 2000,
 					beta_HSw = 0.4
 					)
 	
+### Spatial parameters:
+###
+param.spatial <- loadSpatialParam()
+param.model.sp <- replicate.contact.rates(nLocations = param.spatial[["nLocations"]], param.model)
+param.model.sp <- c(param.model.sp, loadParamMigration("gravity_cst.csv"))
+
+
+######################
+###                ###
+###  SIMULATIONS   ###
+###                ###
+######################
+
+
 ### Runs the SHERIF model with specified parameters
+### (one location, i.e. no spatial structure)
 ###
 x <- rcpp_sherif(paramsSimul = param.simul, 
 				 paramsModel = param.model)
 
-print(x) 
+### Runs the *spatial* SHERIF model with specified parameters
+###
+x.sp <- rcpp_sherif_spatial(paramsSimul = param.simul, 
+                            paramsModel = param.model.sp,
+                            paramsSpatial = param.spatial)
+
+
+
+######################
+###                ###
+###     PLOTS      ###
+###                ###
+######################
+
 ### Merely plots incidence of first Monte-Carlo iteration
-### to quickly check if something went *reslly* wrong...
+### to quickly check if something went *really* wrong...
 ###
 pdf("sherif_test.pdf")
-plot(x=x$time[[1]], y=x$cumIncidence[[1]],typ="s")
+# non-spatial:
+plot(x=x$time[[1]], y=x$cumIncidence[[1]],typ="s",main="Incidence (non-spatial model)")
+# spatial:
+nloc <- length(x.sp)
+nloc.p <- ceiling(sqrt(nloc))
+par(mfrow=c(nloc.p,nloc.p))
+for(i in 1:nloc) plot(x=x.sp[[i]]$time[[1]], 
+                      y=x.sp[[i]]$cumIncidence[[1]],
+                      main = paste("Incidence at location #",i),
+                      typ="s")
 dev.off()
 
-if(length(x)>0) message("sherif library seems to be working; check sherif_test.pdf for a quick visual diagnostic...")
+if(length(x)>0) 
+    message("sherif library seems to be working; check sherif_test.pdf for a quick visual diagnostic...")
