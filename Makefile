@@ -5,31 +5,18 @@ target pngtarget pdftarget vtarget acrtarget: NIH_example.Rout
 
 ##################################################################
 
-# make files ~
+# JD's make files toolbox:
 
 Sources = Makefile .gitignore 
-
 ms = ../makestuff
-
 -include $(ms)/git.def
 
+
 ##################################################################
-
-# Old C stuff that we may not need
-Sources += exe.mk
-
-# compiler.mk is intended to be a local file; it uses clang by default, but you can just edit and save it on any particular machine. Don't add it to sources
-
-# Add your own compiler makefile to this list to share it between machines
-Sources += clang.mk gcc.mk
-
--include compiler.mk
-compiler.mk:
-	/bin/cp clang.mk $@
-
-######################################################################
-
-# Build the library
+###
+###   Build the R library for SHERIF model from C++ code (with Rcpp)
+###
+##################################################################
 
 lib:
 	mkdir $@
@@ -54,48 +41,19 @@ make_library.Rout: $(libh) $(libcpp) lib Makevars make_library.R
 	touch $@
 
 ######################################################################
-
-# NIH_example: Make output file from fake parameters
-
-format_functions = run_sherif_FCT.R loadParam_FCT.R
-format_functions += format_NIH_FCT.R format_NIH.R
-Sources += $(format_functions)
-format_functions.Rout: $(format_functions)
-	$(run-R)
-
-Sources += NIH_example.R
-Sources += param_model.csv param_simul.csv prediction_date.csv
-
-NIH_example.Rout: lib/sherif
-NIH_example.Rout: format_functions.Rout loadParam_FCT.Rout
-NIH_example.Rout: param_model.csv param_simul.csv prediction_date.csv
-NIH_example.Rout: NIH_example.R
-	-/bin/rm -rf NIH_example_dir.old
-	-/bin/mv -f NIH_example_dir NIH_example_dir.old
-	mkdir NIH_example_dir
-	$(run-R)
-
-example_plots.Rout: NIH_example.Rout example_plots.R
-
-NIH_example_dir: NIH_example.Rout ; 
-
-##################################################################
-
-# Do a spatial test (JD's version)
-
-spatial_test.Rout: NIH_format lib/sherif
-
-NIH_format:
-	mkdir $@
+###
+### Test if sherif R library works correctly
+###
+######################################################################
 
 SpatialCSV = distLocations.csv gravity_cst.csv initLocations.csv nLocations.csv param_model.csv param_simul.csv popLocations.csv prediction_date.csv
-Sources += $(SpatialCSV)
-Sources += spatial_test.R run_sherif_spatial_FCT.R
-spatial_test.Rout: format_NIH.Rout $(SpatialCSV) run_sherif_spatial_FCT.Rout loadParam_FCT.Rout spatial_test.R
+
+sherif_test.Rout: sherif_test.R make_library.Rout
 	$(run-R)
 
-##################################################################
 
+
+##################################################################
 # JD git rules
 -include $(ms)/git.mk
 -include $(ms)/visual.mk
