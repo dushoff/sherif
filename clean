@@ -1,0 +1,5 @@
+rm -rf *.Rlog
+rm -rf *.Rout
+rm -rf *.RR
+rm -rf *.RData
+
