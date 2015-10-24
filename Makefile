@@ -1,3 +1,5 @@
+### Sherif
+
 ### Hooks for the editor to set the default target
 current: target
 
@@ -15,25 +17,15 @@ ms = ../makestuff
 
 ##################################################################
 
-# Old C stuff that we may not need
-Sources += exe.mk
-
-# compiler.mk is intended to be a local file; it uses clang by default, but you can just edit and save it on any particular machine. Don't add it to sources
-
-# Add your own compiler makefile to this list to share it between machines
-Sources += clang.mk gcc.mk
-
--include compiler.mk
-compiler.mk:
-	/bin/cp clang.mk $@
-
-######################################################################
-
 # Build the library
 
 lib:
 	mkdir $@
 	-cp -r ../../lib/sherif $@
+
+# individual.cpp defines the class of individuals
+# simulator.cpp runs the model
+# mc.cpp is a Monte Carlo wrapper for simulator
 
 libroot = EventNumberContainer dcTools RV globalVar individual mc dcDataFrame simulator dcMatrix spatialSim
 libcpp = $(libroot:%=%.cpp) Rwrap_sherif.cpp
