@@ -53,6 +53,8 @@ public:
 								   vector<double>	beta_HSw,
 								   
 								   string	filename_beta_timedep,
+								   vector<string> overwrite_beta_timedep,
+								   vector<double> overwrite_value,
 								   
 								   double latent_mean,
 								   double infectious_mean_H,

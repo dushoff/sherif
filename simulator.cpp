@@ -191,6 +191,79 @@ void simulator::readfile_beta_timedep(string filename){
 }
 
 
+void simulator::overwrite_beta_timedep(vector<string> paramName,
+									   vector<double> overwval){
+	/// Overwrites whatever was read in the file
+	/// defining the time-dependent parameters
+	/// in function 'readfile_beta_timedep()'.
+	///
+	/// Used for calibration of time-dependent parameters.
+	
+	unsigned long n = paramName.size();
+	stopif(n!=overwval.size(), "Time-dependent beta parameters: overwite not well defined.");
+	
+	for (unsigned long k=0; k<n; k++) {
+		
+		// Extracts substrings to determine
+		// which parameter, time-dependent variable ar affected:
+
+		string x = paramName[k];
+		string us = "_";
+		
+		vector<unsigned long> pos;
+		unsigned int i =0;
+		unsigned long currpos = 0;
+		
+		while (currpos<x.length()) {
+			pos.push_back(x.find(us,currpos+1));
+			currpos = pos[i];
+			i++;
+		}
+		
+		string prm_name = x.substr(0,pos[1]);
+		string timedep_var = x.substr(pos[1]+1,pos[2]-pos[1]-1);
+		string vec = x.substr(pos[2]+1,x.length()-pos[2]);
+		unsigned long pos_elem = stoi(vec.substr(3,string::npos));
+
+		// Now that the parameter to be overwritten
+		// is identified, overwrites with the new value:
+		bool isKnown = false;
+		
+		if(prm_name=="beta_IS"){
+			if (timedep_var=="tstart") {
+				_beta_IS_tstart[pos_elem] = overwval[k];
+				isKnown = true;
+			}
+			if (timedep_var=="tend") {
+				_beta_IS_tend[pos_elem] = overwval[k];
+				isKnown = true;
+			}
+			if (timedep_var=="newval") {
+				_beta_IS_newval[pos_elem] = overwval[k];
+				isKnown = true;
+			}
+		}
+		
+		if(prm_name=="beta_FS"){
+			if (timedep_var=="tstart") {
+				_beta_FS_tstart[pos_elem] = overwval[k];
+				isKnown = true;
+			}
+			if (timedep_var=="tend") {
+				_beta_FS_tend[pos_elem] = overwval[k];
+				isKnown = true;
+			}
+			if (timedep_var=="newval") {
+				_beta_FS_newval[pos_elem] = overwval[k];
+				isKnown = true;
+			}
+		}
+		
+		stopif(!isKnown, "Time-dependent parameter to overwrite is unknown:"+prm_name+timedep_var);
+	}
+	
+	
+}
 
 
 

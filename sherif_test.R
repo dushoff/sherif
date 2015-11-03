@@ -26,7 +26,7 @@ source("sherif_test_FCT.R")
 
 ### Set simulation parameters
 ###
-param.simul <- list(horizon = 30,  # <-- when the simulations stop
+param.simul <- list(horizon = 90,  # <-- when the simulations stop
 					mc_iter = 3,  # <-- Monte Carlo iterations
 					calc_WIW_Re = 0,  # <-- if matrix of Who Infects Who is calculated (WARNING: SLOWS DOWN A LOT)
 					timeStepTauLeap = 0.2, # <-- size of the tau-leap approximation
@@ -65,7 +65,9 @@ param.model <- list(popSize = 2000,
 					beta_FS = 0.2,
 					beta_FSw = 1,
 					beta_HSw = 0.4,
-					beta_timedep = "param_beta_timedep.csv"  # <-- file specifying time-dependence of beta parameters
+					beta_timedep = "param_beta_timedep.csv",  # <-- file specifying time-dependence of beta parameters
+					overwrite_beta_timedep=c("beta_IS_tstart_vec0","beta_IS_newval_vec2"),
+					overwrite_beta_timedep_val=c(5,0.222)
 					)
 	
 ### Spatial parameters:

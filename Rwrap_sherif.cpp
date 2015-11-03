@@ -35,8 +35,13 @@ List rcpp_sherif(List paramsSimul, List paramsModel) {
 	int nI						= paramsModel["nI"];
 	int nH						= paramsModel["nH"];
 	int nF						= paramsModel["nF"];
+	
 	std::string	betaType		= paramsModel["betaType"];
 	std::string	betaTimedep		= paramsModel["beta_timedep"];
+
+	vector<std::string> overwrite_beta	= paramsModel["overwrite_beta_timedep"];
+	vector<double> overwrite_beta_val	= paramsModel["overwrite_beta_timedep_val"];
+	
 	double	beta_IS				= paramsModel["beta_IS"];
 	double	beta_FS				= paramsModel["beta_FS"];
 	double	beta_IwS			= paramsModel["beta_IwS"];
@@ -87,6 +92,8 @@ List rcpp_sherif(List paramsSimul, List paramsModel) {
 										  beta_HSw,
 										  
 										  betaTimedep,
+										  overwrite_beta,
+										  overwrite_beta_val,
 										  
 										  latent_mean,
 										  infectious_mean_H,
@@ -210,6 +217,9 @@ List rcpp_sherif_spatial(List paramsSimul,
 	
 	std::string	betaType		= paramsModel["betaType"];
 	std::string	betaTimedep		= paramsModel["beta_timedep"];
+	vector<std::string> overwrite_beta	= paramsModel["overwrite_beta_timedep"];
+	vector<double> overwrite_beta_val	= paramsModel["overwrite_beta_timedep_val"];
+
 	
 	vector<double>	beta_IS		= paramsModel["beta_IS"];
 	vector<double>	beta_FS		= paramsModel["beta_FS"];
@@ -263,6 +273,8 @@ List rcpp_sherif_spatial(List paramsSimul,
 							  beta_HSw,
 									
 									betaTimedep,
+									overwrite_beta,
+									overwrite_beta_val,
 							  
 							  latent_mean,
 							  infectious_mean_H,

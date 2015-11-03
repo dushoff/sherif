@@ -28,6 +28,8 @@ int main(int argc, const char * argv[]) {
 	// ------------------------------------------
 	
 	
+
+	
 	// Read main simulation parameters from file
 	
 	string fileparam_simul			= "param_simul.csv";
@@ -73,6 +75,14 @@ int main(int argc, const char * argv[]) {
 	string	fname_beta_timedep	= getParameterFromFile_string("beta_timedep", fileparam_model);
 	
 	
+	// Overwriting time-dependent beta parameters:
+	vector<string> overw_prm;
+	overw_prm.push_back("beta_IS_tstart_vec0");
+	overw_prm.push_back("beta_IS_newval_vec1");
+	vector<double> overw_val;
+	overw_val.push_back(15);
+	overw_val.push_back(0.0777);
+	
 	// Simulation parameters
 	
 	double horizon				= getParameterFromFile("horizon", fileparam_simul);
@@ -111,6 +121,8 @@ int main(int argc, const char * argv[]) {
 											  beta_HSw,
 											  
 											  fname_beta_timedep,
+											  overw_prm,
+											  overw_val,
 											  
 											  latent_mean,
 											  infectious_mean_H,
@@ -136,7 +148,7 @@ int main(int argc, const char * argv[]) {
 		
 		vector<double> tmp = SIM.check_values_beta_IS(100);
 		displayVector(tmp);
-		tmp = SIM.check_values_beta_ISw(100);
+		tmp = SIM.check_values_beta_IS(100);
 		displayVector(tmp);
 		
 		
@@ -210,6 +222,8 @@ int main(int argc, const char * argv[]) {
 										vbeta_HSw,
 										
 										fname_beta_timedep,
+										overw_prm,
+										overw_val,
 										
 										latent_mean,
 										infectious_mean_H,

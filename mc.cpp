@@ -20,6 +20,8 @@ simulator initialize_simulation(string	betaType,
 								double	beta_HSw,
 								
 								string	filename_beta_timedep,
+								vector<string> overwrite_beta_timedep,
+								vector<double> overwrite_value,
 								
 								double latent_mean,
 								double infectious_mean_H,
@@ -96,6 +98,10 @@ simulator initialize_simulation(string	betaType,
 	
 	// Set the time dependence of betas (contact rates):
 	SIM.readfile_beta_timedep(filename_beta_timedep);
+	
+	// Overwrite values if requested (typically when calibrating):
+	SIM.overwrite_beta_timedep(overwrite_beta_timedep, overwrite_value);
+	
 	
 	return SIM;
 }
