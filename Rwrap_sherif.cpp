@@ -35,7 +35,8 @@ List rcpp_sherif(List paramsSimul, List paramsModel) {
 	int nI						= paramsModel["nI"];
 	int nH						= paramsModel["nH"];
 	int nF						= paramsModel["nF"];
-	std::string	betaType			= paramsModel["betaType"];
+	std::string	betaType		= paramsModel["betaType"];
+	std::string	betaTimedep		= paramsModel["beta_timedep"];
 	double	beta_IS				= paramsModel["beta_IS"];
 	double	beta_FS				= paramsModel["beta_FS"];
 	double	beta_IwS			= paramsModel["beta_IwS"];
@@ -85,6 +86,8 @@ List rcpp_sherif(List paramsSimul, List paramsModel) {
 										  beta_IwSw,
 										  beta_HSw,
 										  
+										  betaTimedep,
+										  
 										  latent_mean,
 										  infectious_mean_H,
 										  infectious_mean_Hw,
@@ -102,6 +105,12 @@ List rcpp_sherif(List paramsSimul, List paramsModel) {
 										  nE, nI, nH, nF,
 										  timeIdxGI,
 										  singleLocation);
+	
+	// DEBUG ===
+	cout << " D E B U G =====" << endl;
+	vector<double> tmp = SIM.check_values_beta_IS(100);
+	displayVector(tmp);
+	// =========
 	
 	vector<simulator> sim_mc = MC_run_tauLeap_sim(SIM,
 												  mc_iter,
@@ -167,7 +176,11 @@ List rcpp_sherif(List paramsSimul, List paramsModel) {
 						Named("GIbck_time") = GIbck_time,
 						Named("GIbck_gi") = GIbck_gi,
 						Named("Reff_timeAcq") = Reff_timeAcq,
-						Named("Reff_n2ndCases") = Reff_n2ndCases
+						Named("Reff_n2ndCases") = Reff_n2ndCases,
+						Named("check_beta_IS")=sim_mc[0].check_values_beta_IS(horizon),
+						Named("check_beta_ISw")=sim_mc[0].check_values_beta_ISw(horizon),
+						Named("check_beta_FS")=sim_mc[0].check_values_beta_FS(horizon),
+						Named("check_beta_FSw")=sim_mc[0].check_values_beta_FSw(horizon)
 						);
 	
 }
@@ -194,7 +207,10 @@ List rcpp_sherif_spatial(List paramsSimul,
 	int nI						= paramsModel["nI"];
 	int nH						= paramsModel["nH"];
 	int nF						= paramsModel["nF"];
-	std::string	betaType			= paramsModel["betaType"];
+	
+	std::string	betaType		= paramsModel["betaType"];
+	std::string	betaTimedep		= paramsModel["beta_timedep"];
+	
 	vector<double>	beta_IS		= paramsModel["beta_IS"];
 	vector<double>	beta_FS		= paramsModel["beta_FS"];
 	vector<double>	beta_IwS	= paramsModel["beta_IwS"];
@@ -245,6 +261,8 @@ List rcpp_sherif_spatial(List paramsSimul,
 							  beta_FSw,
 							  beta_IwSw,
 							  beta_HSw,
+									
+									betaTimedep,
 							  
 							  latent_mean,
 							  infectious_mean_H,

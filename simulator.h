@@ -71,6 +71,8 @@ class simulator
 
 	// --- Contact rates ---
 	
+	string		_betaType;	// how the betas should be interpreted
+	
 	// baseline (constant) values:
 	double		_beta_IS;
 	double		_beta_FS;
@@ -332,16 +334,17 @@ public:
 					   unsigned long initI);
 	
 	
+	// Time dependence for betas
 	void	set_beta_timedep(vector<double> beta_IS_tstart,
 							 vector<double> beta_IS_tend,
 							 vector<double> beta_IS_newval);
-
 	void	clear_beta_timedep();
-	
 	void	readfile_beta_timedep(string filename);
-	
-	
-	
+
+	vector<double> check_values_beta_IS(double horizon);
+	vector<double> check_values_beta_ISw(double horizon);
+	vector<double> check_values_beta_FS(double horizon);
+	vector<double> check_values_beta_FSw(double horizon);
 	
 	// ===== GET FUNCTIONS =====
 	

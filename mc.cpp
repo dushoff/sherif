@@ -19,6 +19,8 @@ simulator initialize_simulation(string	betaType,
 								double	beta_IwSw,
 								double	beta_HSw,
 								
+								string	filename_beta_timedep,
+								
 								double latent_mean,
 								double infectious_mean_H,
 								double infectious_mean_Hw,
@@ -91,6 +93,9 @@ simulator initialize_simulation(string	betaType,
 				  firstID,
 				  GIbck_sampleTime,
 				  singleLocation);
+	
+	// Set the time dependence of betas (contact rates):
+	SIM.readfile_beta_timedep(filename_beta_timedep);
 	
 	return SIM;
 }

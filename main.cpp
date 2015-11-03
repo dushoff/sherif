@@ -70,6 +70,7 @@ int main(int argc, const char * argv[]) {
 	double	pH					= getParameterFromFile("pH", fileparam_model);
 	double	pHw					= getParameterFromFile("pHw", fileparam_model);
 	
+	string	fname_beta_timedep	= getParameterFromFile_string("beta_timedep", fileparam_model);
 	
 	
 	// Simulation parameters
@@ -99,6 +100,7 @@ int main(int argc, const char * argv[]) {
 		
 		bool singleLocation = true;
 		unsigned long firstID = 0;
+		
 		simulator SIM = initialize_simulation(betaType,
 											  beta_IS,
 											  beta_FS,
@@ -107,6 +109,8 @@ int main(int argc, const char * argv[]) {
 											  beta_FSw,
 											  beta_IwSw,
 											  beta_HSw,
+											  
+											  fname_beta_timedep,
 											  
 											  latent_mean,
 											  infectious_mean_H,
@@ -127,14 +131,13 @@ int main(int argc, const char * argv[]) {
 											  singleLocation,
 											  firstID);
 		
-		string file_beta_timedep = "beta_IS_timedep.csv";
-		SIM.readfile_beta_timedep(file_beta_timedep);
 		
-		for (int i=0; i<100; i++) {
-			double x = double(i);
-			cout << "TEST: "<<x <<" ==> "<< SIM.get_beta_FS_fct(x)<<endl;
-		}
-
+		//
+		
+		vector<double> tmp = SIM.check_values_beta_IS(100);
+		displayVector(tmp);
+		tmp = SIM.check_values_beta_ISw(100);
+		displayVector(tmp);
 		
 		
 		// Choose if execution outputs to files
@@ -166,6 +169,8 @@ int main(int argc, const char * argv[]) {
 	
 	
 	if(do_multiLocation){
+		
+		string file_beta_timedep = "beta_IS_timedep.csv";
 		
 		// ==== SPATIAL SIMULATION ====
 		
@@ -203,6 +208,8 @@ int main(int argc, const char * argv[]) {
 										vbeta_FSw,
 										vbeta_IwSw,
 										vbeta_HSw,
+										
+										fname_beta_timedep,
 										
 										latent_mean,
 										infectious_mean_H,

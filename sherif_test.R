@@ -57,14 +57,15 @@ param.model <- list(popSize = 2000,
 					deltaH = 0.5,
 					pH = 0.3,
 					pHw = 0.9,
-					betaType = "standard",  # <-- How parameters 'beta_xx' should be interpreted 
+					betaType = "reduced",  # <-- How parameters 'beta_xx' should be interpreted: "standard" or "reduced" 
 					beta_IS = 0.2,
+					beta_IwS = 1,
+					beta_ISw = 1,
+					beta_IwSw = 1,
 					beta_FS = 0.2,
-					beta_IwS = 0.2,
-					beta_ISw = 0.2,
-					beta_FSw = 0.2,
-					beta_IwSw = 0.1,
-					beta_HSw = 0.4
+					beta_FSw = 1,
+					beta_HSw = 0.4,
+					beta_timedep = "param_beta_timedep.csv"  # <-- file specifying time-dependence of beta parameters
 					)
 	
 ### Spatial parameters:
@@ -107,6 +108,17 @@ x.sp <- rcpp_sherif_spatial(paramsSimul = param.simul,
 pdf("sherif_test.pdf")
 # non-spatial:
 plot(x=x$time[[1]], y=x$cumIncidence[[1]],typ="s",main="Incidence (non-spatial model)")
+
+b <- x$check_beta_IS
+b2<- x$check_beta_ISw
+b3<- x$check_beta_FS
+b4<- x$check_beta_FSw
+par(mfrow=c(2,2))
+plot(x=1:length(b), y=b,typ="l", main="beta_IS",lwd=6,xlab="days",ylab="",las=1); grid()
+plot(x=1:length(b2), y=b2,typ="l", main="beta_ISw",lwd=6,xlab="days",ylab="",las=1); grid()
+plot(x=1:length(b3), y=b3,typ="l", main="beta_FS",lwd=6,xlab="days",ylab="",las=1); grid()
+plot(x=1:length(b4), y=b4,typ="l", main="beta_FSw",lwd=6,xlab="days",ylab="",las=1); grid()
+par(mfrow=c(1,1))
 # spatial:
 nloc <- length(x.sp)
 nloc.p <- ceiling(sqrt(nloc))

@@ -40,52 +40,30 @@ simulator::simulator(string betaType,
 {
 	/// Constructs a simulator object
 	
+	
+	
+	_beta_IS = beta_IS;
+	_beta_FS = beta_FS;
+	_beta_IwS = beta_IwS;
+	_beta_ISw = beta_ISw;
+	_beta_FSw = beta_FSw;
+	_beta_IwSw = beta_IwSw;
+	_beta_HSw = beta_HSw;
+
 	bool betaTypeKnown = false;
+	_betaType = betaType;
 	
-	if(betaType=="standard"){
-		// In this case, standard interpretation
-		// of parameters
-		
-		betaTypeKnown = true;
-		_beta_IS = beta_IS;
-		_beta_FS = beta_FS;
-		_beta_IwS = beta_IwS;
-		_beta_ISw = beta_ISw;
-		_beta_FSw = beta_FSw;
-		_beta_IwSw = beta_IwSw;
-		_beta_HSw = beta_HSw;
-	}
+	// In this case, standard interpretation of parameters
+	if(_betaType=="standard") betaTypeKnown = true;
 	
-	if(betaType=="reduced"){
-		// In this case, some betas are relative from one another
-		// in order to reduce the parameter space
-		//
-		// WARNING: some parameters are now interpreted
-		// as multiplicative factor!
-		// (TO DO: CHANGE THIS?)
-		
-		cout << " === W A R N I N G === "<< endl;
-		cout << " beta_IwS, beta_ISw and beta_IwSw are interpreted as multiplicative factor in front of beta_IS"<<endl;
-		cout << " beta_FSw is interpreted as multiplicative factor in front of beta_FS"<<endl;
-		cout << " =====================" << endl;
-		
-		betaTypeKnown = true;
-		
-		// infectious - susceptible
-		_beta_IS	= beta_IS;
-		_beta_IwS	= beta_IwS * _beta_IS;
-		_beta_ISw	= beta_ISw * _beta_IS;
-		_beta_IwSw	= beta_IwSw * _beta_IS;
-		
-		
-		// Funeral - susceptibles
-		_beta_FS	= beta_FS;
-		_beta_FSw	= beta_FSw * _beta_FS;
-		
-		// Hospitalized - susceptible HCW (like standard)
-		_beta_HSw	= beta_HSw;
-	}
+	// In this case, some betas are relative from one another
+	// in order to reduce the parameter space
+	//
+	// WARNING: some parameters are now interpreted
+	// as multiplicative factor!
+	if(_betaType=="reduced") betaTypeKnown = true;
 	
+	// catch errors:
 	string errmsg = "Beta type ["+betaType+"] unknown!";
 	stopif(!betaTypeKnown,errmsg);
 	
@@ -379,13 +357,75 @@ double simulator::_beta_FS_fct(double t){
 }
 
 
+// TO DO WHEN HAVE TIME:
+// implement non 'reduced' case for functions below:
+double simulator::_beta_IwS_fct(double t){
+	if (_betaType == "reduced")
+		return _beta_IwS*_beta_IS_fct(t);
+	return _beta_IwS;
+}
 
-double		simulator::_beta_IwS_fct(double t){return _beta_IwS;}
-double		simulator::_beta_ISw_fct(double t){return _beta_ISw;}
-double		simulator::_beta_FSw_fct(double t){return _beta_FSw;}
-double		simulator::_beta_IwSw_fct(double t){return _beta_IwSw;}
+double		simulator::_beta_ISw_fct(double t){
+	if (_betaType == "reduced")
+		return _beta_ISw*_beta_IS_fct(t);
+	return _beta_ISw;
+}
+
+double		simulator::_beta_IwSw_fct(double t){
+	if (_betaType == "reduced")
+		return _beta_IwSw*_beta_IS_fct(t);
+	return _beta_IwSw;
+}
+
+double		simulator::_beta_FSw_fct(double t){
+	if (_betaType == "reduced")
+		return _beta_FSw*_beta_FS_fct(t);
+	return _beta_FSw;
+}
+// ------
+
+
+// TO DO WHEN HAVE TIME:
+// Make this function time dependent too
 double		simulator::_beta_HSw_fct(double t){return _beta_HSw;}
+// ----
 
+
+vector<double> simulator::check_values_beta_IS(double horizon){
+	/// check the values of beta_IS from time 0 until 'horizon'
+	vector<double> res;
+	for(double t=0; t<=horizon; t++)
+		res.push_back(_beta_IS_fct(t));
+	return res;
+}
+
+vector<double> simulator::check_values_beta_ISw(double horizon){
+	/// check the values of beta_ISw from time 0 until 'horizon'
+	vector<double> res;
+	for(double t=0; t<=horizon; t++)
+		res.push_back(_beta_ISw_fct(t));
+	return res;
+}
+
+vector<double> simulator::check_values_beta_FS(double horizon){
+	/// check the values of beta_FS from time 0 until 'horizon'
+	vector<double> res;
+	for(double t=0; t<=horizon; t++)
+		res.push_back(_beta_FS_fct(t));
+	return res;
+}
+
+vector<double> simulator::check_values_beta_FSw(double horizon){
+	/// check the values of beta_FS from time 0 until 'horizon'
+	vector<double> res;
+	for(double t=0; t<=horizon; t++)
+		res.push_back(_beta_FSw_fct(t));
+	return res;
+}
+
+// ===================
+// === EVENT RATES ===
+// ===================
 
 double simulator::eventRate_infection_S_by_I(){
 	/// Infection rate on susceptible by infectious, all in general pop
@@ -448,8 +488,6 @@ double simulator::eventRate_progress_E(unsigned int i){
 	/// (stages from i='1' to '_nE-1')
 	
 	stopif(i>=_nE || i<=0, "index out of bounds");
-//	unsigned long NEi = census_state(getState_E(i));
-
 	unsigned long NEi = _table_state_ID[getState_E(i)].size();
 	return _sigma[i-1]*NEi;
 }
@@ -464,10 +502,7 @@ double simulator::eventRate_progress_Ew(unsigned int i){
 
 	unsigned long NEi = _table_state_ID[getState_Ew(i)].size();
 	return _sigma[i-1]*NEi;
-	//return _sigma[i-1]*census_state(getState_Ew(i));
 }
-
-
 
 double simulator::eventRate_infectOnset(){
 	
@@ -475,8 +510,6 @@ double simulator::eventRate_infectOnset(){
 	
 	unsigned long n = _table_state_ID[getState_E(_nE)].size();
 	return _sigma[_nE-1]*n;
-	
-	//return _sigma[_nE-1]*census_state(getState_E(_nE));
 }
 
 
@@ -487,8 +520,6 @@ double simulator::eventRate_infectOnset_HCW(){
 	
 	unsigned long n = _table_state_ID[getState_Ew(_nE)].size();
 	return _sigma[_nE-1]*n;
-	
-	//return _sigma[_nE-1]*census_state(getState_Ew(_nE));
 }
 
 
@@ -502,7 +533,6 @@ double simulator::eventRate_progress_I(unsigned int i){
 	double gamma = _pH*_gamma_H[i-1] + (1-_pH)*(_delta*_gamma_F[i-1]+(1-_delta)*_gamma_R[i-1]);
 	
 	return gamma*_table_state_ID[getState_I(i)].size();
-	//return gamma*census_state(getState_I(i));
 }
 
 
@@ -515,7 +545,6 @@ double simulator::eventRate_progress_Iw(unsigned int i){
 	double gamma = _pHw*_gamma_Hw[i-1] + (1-_pHw)*(_delta*_gamma_F[i-1]+(1-_delta)*_gamma_R[i-1]);
 
 	return gamma*_table_state_ID[getState_Iw(i)].size();
-	//return gamma*census_state(getState_Iw(i));
 }
 
 double simulator::eventRate_hospital(){

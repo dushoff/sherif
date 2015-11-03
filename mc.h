@@ -22,6 +22,8 @@ simulator initialize_simulation(string	betaType,
 								double	beta_IwSw,
 								double	beta_HSw,
 								
+								string	filename_beta_timedep,
+								
 								double latent_mean,
 								double infectious_mean_H,
 								double infectious_mean_Hw,
