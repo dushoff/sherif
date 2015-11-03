@@ -375,6 +375,21 @@ template <class T> vector<T> bindVector(vector<T> x, vector<T> y){
 }
 
 
+template <class T> bool is_ordered(vector<T> x){
+	
+	/// Check if the vector is ordered
+	bool res = true;
+	
+	for(int i=0; i<x.size()-1; i++) {
+		if(x[i]>x[i+1]){
+			res = false;
+			break;
+		}
+	}
+	
+	return res;
+}
+
 
 
 
@@ -599,6 +614,7 @@ vector<double> comp_adj(double a, double min_a, double max_a,
 double pseudo_beta(double x, double a, double b);
 double pseudo_gamma(double x, double shape, double scale);
 
+double step_slope(double t, double val1, double val2, double t1, double t2);
 
 
 #endif

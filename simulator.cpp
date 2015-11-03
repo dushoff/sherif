@@ -8,7 +8,6 @@
 
 #include "simulator.h"
 
-
 simulator::simulator(string betaType,
 					 double	beta_IS,
 					 double	beta_FS,
@@ -90,6 +89,10 @@ simulator::simulator(string betaType,
 	string errmsg = "Beta type ["+betaType+"] unknown!";
 	stopif(!betaTypeKnown,errmsg);
 	
+	// beta's time dependence parameters
+	// initialized as emtpy here.
+	// see function 'xxx' for setting the actual values.
+	clear_beta_timedep();
 	
 	_sigma = sigma;
 	
@@ -125,6 +128,93 @@ simulator::simulator(string betaType,
 	
 	_singleLocation = singleLocation;
 }
+
+
+
+
+void simulator::set_beta_timedep(vector<double> beta_IS_tstart,
+								 vector<double> beta_IS_tend,
+								 vector<double> beta_IS_newval){
+	_beta_IS_tstart	= beta_IS_tstart;
+	_beta_IS_tend	= beta_IS_tend;
+	_beta_IS_newval	= beta_IS_newval;
+}
+
+
+void simulator::clear_beta_timedep(){
+	_beta_IS_tend.clear();
+	_beta_IS_tstart.clear();
+	_beta_IS_newval.clear();
+	// F --> S
+	_beta_FS_tend.clear();
+	_beta_FS_tstart.clear();
+	_beta_FS_newval.clear();
+}
+
+void simulator::readfile_beta_timedep(string filename){
+	
+	/// Read files where values of time-dependent parameters
+	/// for betas are specified.
+	
+	// If there is no file, then parameters are all assumed
+	// to be constant in time.
+	// The vectors _beta_IS_tstart, etc are set empty in
+	// the simulator constructor.
+	
+	// The file must have the following format (no headers):
+	//
+	// parameter_name1, tstart1, tend1, newval1
+	// parameter_name2, tstart2, tend2, newval2
+	// parameter_name3, tstart3, tend3, newval3
+	// etc.
+	
+	
+	// retrieve parameter names:
+	vector<string> prmName;
+	vectorFromCSVfile_string(prmName, filename.c_str(), 1);
+
+	// retrieve parameter's start & end dates:
+	vector<double> tstart;
+	vectorFromCSVfile(tstart, filename.c_str(), 2);
+	vector<double> tend;
+	vectorFromCSVfile(tend, filename.c_str(), 3);
+	vector<double> newval;
+	vectorFromCSVfile(newval, filename.c_str(), 4);
+
+	unsigned long n = prmName.size();
+	
+	// integrity checks
+	stopif(n != tstart.size(),"file "+filename+ " not well defined");
+	stopif(n != tend.size(),"file "+filename+ " not well defined");
+	
+	// make sure the time-dependent vactors are cleared:
+	clear_beta_timedep();
+	
+	// assign values from the file:
+	for (unsigned long i=0; i<n; i++) {
+		
+		bool prm_known = false;
+		
+		if(prmName[i]=="beta_IS"){
+			_beta_IS_tstart.push_back(tstart[i]);
+			_beta_IS_tend.push_back(tend[i]);
+			_beta_IS_newval.push_back(newval[i]);
+			prm_known = true;
+		}
+		
+		if(prmName[i]=="beta_FS"){
+			_beta_FS_tstart.push_back(tstart[i]);
+			_beta_FS_tend.push_back(tend[i]);
+			_beta_FS_newval.push_back(newval[i]);
+			prm_known = true;
+		}
+		stopif(!prm_known,"Parameter name "+prmName[i]+" unknown when time dependence defined.");
+	}
+}
+
+
+
+
 
 void simulator::displayPopulation(bool indivDetails){
 	
@@ -233,9 +323,63 @@ unsigned long simulator::findIndivIdx(unsigned long ID){
 }
 
 
-// Contact rates are constant for now...
-double		simulator::_beta_IS_fct(double t){return _beta_IS;}
-double		simulator::_beta_FS_fct(double t){return _beta_FS;}
+double sum_of_step_slope(double t,
+						 double basevalue,
+						 vector<double> tstart,
+						 vector<double> tend,
+						 vector<double> newval){
+	/// helper function for '_beta_xx_fct'
+	
+	unsigned long n = tstart.size();
+	
+	// integrity checks:
+	stopif(! is_ordered(tstart), "tstart vector is not ordered.");
+	stopif(! is_ordered(tend), "tstart vector is not ordered.");
+	
+	double s = 0.0;
+	for(int i=0; i<n; i++){
+		double val1 = 0.0;
+		double previousVal = basevalue;
+		if(i>0) previousVal = newval[i-1];
+		double val2 = newval[i] - previousVal;
+		double t1 = tstart[i];
+		double t2 = tend[i];
+		s += step_slope(t, val1, val2, t1, t2);
+	}
+	return s;
+}
+
+
+
+// === Contact rates functions ===
+
+double simulator::_beta_IS_fct(double t){
+
+	double res = _beta_IS;
+	unsigned long n = _beta_IS_tstart.size();
+	if(n>0) res = _beta_IS + sum_of_step_slope(t,
+											   _beta_IS,
+											   _beta_IS_tstart,
+											   _beta_IS_tend,
+											   _beta_IS_newval);
+	return res;
+}
+
+
+double simulator::_beta_FS_fct(double t){
+	
+	double res = _beta_FS;
+	unsigned long n = _beta_FS_tstart.size();
+	if(n>0) res = _beta_FS + sum_of_step_slope(t,
+											   _beta_FS,
+											   _beta_FS_tstart,
+											   _beta_FS_tend,
+											   _beta_FS_newval);
+	return res;
+}
+
+
+
 double		simulator::_beta_IwS_fct(double t){return _beta_IwS;}
 double		simulator::_beta_ISw_fct(double t){return _beta_ISw;}
 double		simulator::_beta_FSw_fct(double t){return _beta_FSw;}

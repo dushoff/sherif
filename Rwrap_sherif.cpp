@@ -57,6 +57,19 @@ List rcpp_sherif(List paramsSimul, List paramsModel) {
 	double	timeIdxGI			= paramsSimul["timeIdxGI"];
 	bool	silentMode			= paramsSimul["silentMode"];
 	
+	
+	// catch user's potential input errors:
+	if(horizon < 1) {
+		cerr << "Horizon cannot be smaller than 1"<<endl;
+		exit(1);
+	}
+	
+	if(horizon < timeIdxGI) {
+		cerr << "Horizon cannot be smaller than timeIdxGI"<<endl;
+		exit(1);
+	}
+	
+	
 	// === Simulations ===
 	
 	// Explictly confirms it's a single location:

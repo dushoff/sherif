@@ -132,32 +132,25 @@ public:
 		
 		// 1ST COLUMN = VARIABLES NAMES
 		
-		
 		ifstream fh(filename);
 		
 		// Retrieve first line
 		vector<string> headersNames = getFirstLineHeaders(fh);
 		unsigned int n = headersNames.size();
 		
-		if (headers)
-		{
+		if (headers){
 			// Assume first column is not relevant (because column of variable names)
 			headersNames.erase(headersNames.begin());
 			_colname = headersNames;
 		}
 		
-		if (!headers)
-		{
+		if (!headers){
 			_colname.clear();
 			
-			for (int i=0; i<n-1; i++)
-			{
+			for (int i=0; i<n-1; i++){
 				_colname.push_back("V"+int2string(i));
 			}
-			
 		}
-		
-		
 		
 		// Retrieve variable names = 1st column
 		vector<string> tmp_varname;
@@ -182,8 +175,6 @@ public:
 		if (headers) M.removeRow(0);
 		
 		_value = M;
-		
-
 	}
 	
 	

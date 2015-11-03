@@ -84,6 +84,7 @@ int main(int argc, const char * argv[]) {
 	bool	calc_WIW_Re			= getParameterFromFile("calc_WIW_Re", fileparam_simul);
 	bool	silentMode			= getParameterFromFile("silentMode", fileparam_simul);
 	
+	
 	// === Simulations ===
 	
 	int jobnum = 1;
@@ -126,8 +127,19 @@ int main(int argc, const char * argv[]) {
 											  singleLocation,
 											  firstID);
 		
+		string file_beta_timedep = "beta_IS_timedep.csv";
+		SIM.readfile_beta_timedep(file_beta_timedep);
+		
+		for (int i=0; i<100; i++) {
+			double x = double(i);
+			cout << "TEST: "<<x <<" ==> "<< SIM.get_beta_FS_fct(x)<<endl;
+		}
+
+		
+		
 		// Choose if execution outputs to files
-		// or outputs objects (<- used in R wrapping)
+		// or outputs objects (<- used in R wrappin
+	
 		bool output_to_files = false;
 		
 		if(output_to_files)

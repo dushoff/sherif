@@ -69,7 +69,9 @@ class simulator
 	unsigned int _nH;
 	unsigned int _nF;
 
-	// Contact rates
+	// --- Contact rates ---
+	
+	// baseline (constant) values:
 	double		_beta_IS;
 	double		_beta_FS;
 	double		_beta_IwS;
@@ -78,6 +80,7 @@ class simulator
 	double		_beta_IwSw;
 	double		_beta_HSw;
 	
+	// function returning time-dependent values:
 	double		_beta_IS_fct(double t);
 	double		_beta_FS_fct(double t);
 	double		_beta_IwS_fct(double t);
@@ -85,6 +88,16 @@ class simulator
 	double		_beta_FSw_fct(double t);
 	double		_beta_IwSw_fct(double t);
 	double		_beta_HSw_fct(double t);
+	
+	// parameters defining time-dependence:
+	vector<double>		_beta_IS_tstart;	// time when the transition to new value starts
+	vector<double>		_beta_IS_tend;		// time when the transition to new value ends (from that date, new value prevails)
+	vector<double>		_beta_IS_newval;	// new value after 'tend'
+
+	vector<double>		_beta_FS_tstart;
+	vector<double>		_beta_FS_tend;
+	vector<double>		_beta_FS_newval;
+	
 	
 	
 	vector<double>		_sigma;		// inv. mean latent duration
@@ -318,6 +331,18 @@ public:
 					   unsigned long initIw,
 					   unsigned long initI);
 	
+	
+	void	set_beta_timedep(vector<double> beta_IS_tstart,
+							 vector<double> beta_IS_tend,
+							 vector<double> beta_IS_newval);
+
+	void	clear_beta_timedep();
+	
+	void	readfile_beta_timedep(string filename);
+	
+	
+	
+	
 	// ===== GET FUNCTIONS =====
 	
 	individual				get_individual(unsigned long i) {return _indiv[i];}
@@ -350,6 +375,10 @@ public:
 	vector<double>			get_Reff_final_n2ndCases();
 	
 	double					get_time_firstCase() {return _time_firstCase;}
+	
+	double					get_beta_IS_fct(double t){return _beta_IS_fct(t);}
+	double					get_beta_FS_fct(double t){return _beta_FS_fct(t);}
+	
 	
 	// ===== Functions associated with individuals =====
 	

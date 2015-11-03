@@ -1536,3 +1536,23 @@ double pseudo_gamma(double x, double shape, double scale)
 }
 
 
+
+double step_slope(double t,
+				  double val1, double val2,
+				  double t1, double t2){
+	/// Step function with slope:
+	/// if t<t1 : fct = val1
+	/// if t>t2 : fct = val2
+	/// if t1<t<t2 : fct = linear interpol
+	
+	stopif(abs(t1-t2)<1E-9,"t1 and t2 too close");
+	
+	double fct=9E9;
+	
+	if(t<t1) fct = val1;
+	if(t2<t) fct = val2;
+	if(t1<=t && t<=t2) fct = (t-t1)/(t2-t1)*val2 + (t-t2)/(t1-t2)*val1;
+	
+	return fct;
+}
+
