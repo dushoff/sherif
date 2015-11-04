@@ -114,9 +114,9 @@ List rcpp_sherif(List paramsSimul, List paramsModel) {
 										  singleLocation);
 	
 	// DEBUG ===
-	cout << " D E B U G =====" << endl;
-	vector<double> tmp = SIM.check_values_beta_IS(100);
-	displayVector(tmp);
+//	cout << " D E B U G =====" << endl;
+//	vector<double> tmp = SIM.check_values_beta_IS(300);
+//	displayVector(tmp);
 	// =========
 	
 	vector<simulator> sim_mc = MC_run_tauLeap_sim(SIM,
