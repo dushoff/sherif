@@ -504,6 +504,9 @@ double simulator::eventRate_infection_S_by_I(){
 	/// Infection rate on susceptible by infectious, all in general pop
 	
 	double t = _currentTime;
+	
+	//cout << "DEBUG BETA: "<< t << " => "<<_beta_IS_fct(t)<<endl;
+	
 	return _beta_IS_fct(t)*_count_I*_count_S/_indiv.size();
 }
 
@@ -1386,12 +1389,13 @@ void simulator::run_tauLeap(double horizon,
 	
 	initialize(initI, initIw, initSw);
 	double t = 0.0;
-	
+
 	while ( t<horizon && !all_in_R_or_D() )
 	{
-		double					time_event = t+timestepSize;
-		EventNumberContainer	ENC = drawNumberEvents_tauLeap(timestepSize);
+		double time_event = t+timestepSize;
+		_currentTime = time_event;
 		
+		EventNumberContainer ENC = drawNumberEvents_tauLeap(timestepSize);
 		unsigned long nTotalEvents = ENC._event_label.size();
 		
 		for (int ev=0; ev<nTotalEvents; ev++) {
@@ -1433,7 +1437,7 @@ void simulator::run_tauLeap(double horizon,
 		
 		
 		update_incidences();
-		update_prevalence(); // delete: _prevalence.push_back(_count_I+_count_Iw+_count_H);  // update prevalence time series
+		update_prevalence();
 		update_all_count_vec();   // update counts time series
 		
 		// update times
