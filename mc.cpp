@@ -127,7 +127,6 @@ vector<simulator> MC_run_tauLeap_sim(simulator S, unsigned long iter_mc,
 		cout<<endl<<"MC "<<i+1<<"/"<<iter_mc<<" (tau leap "<<timeStep<<")"<<endl;
 		S.run_tauLeap(horizon, timeStep, initI, initIw,initSw, calc_WIW_Re);
 		sim_out.push_back(S);
-
 	}
 	return sim_out;
 }

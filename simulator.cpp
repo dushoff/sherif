@@ -1423,9 +1423,10 @@ void simulator::run_tauLeap(double horizon,
 		}
 		
 		// update backward GI
-		
 		// NEW STUFF 2015-09-24 (<-- delete this comment when sure OK)
-		if(fabs(t-get_GIbck_sampleTime())<timestepSize/2.0) update_GIbck(t);
+		if(fabs(t-get_GIbck_sampleTime())<timestepSize/2.0)	update_GIbck(t);
+		
+		calc_RR();
 		
 		// DELETE (?) ----------------------------------------
 		// (not at all event dates b/c of memory cost)
@@ -1495,6 +1496,16 @@ void simulator::calc_WIW(double t)
 
 
 
+void simulator::calc_RR(){
+	/// Calculate the realized reproductive number
+	
+	if (_WIW.size()>0){
+		unsigned long cases
+	}
+}
+
+
+
 void simulator::calc_Reff_final()
 {
 	/// Calculate the realized Effective Reproductive number
@@ -1507,12 +1518,10 @@ void simulator::calc_Reff_final()
 		vector<double> acq_time;
 	 
 		for (unsigned long i=0; i<_indiv.size(); i++){
-		 if (!is_indiv_susceptible(i))
-		 {
+		 if (!is_indiv_susceptible(i)){
 			 // counts the number of infectees for everyone
 			 unsigned long c_i = _WIW[_WIW.size()-1].countNonZeroElements_line(i);
 			 n_2nd_cases.push_back((double)c_i);
-			 
 			 // retrieve disease acquisition time:
 			 acq_time.push_back(_indiv[i].get_timeDiseaseAcquisition());
 		 }

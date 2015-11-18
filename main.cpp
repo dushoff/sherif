@@ -26,8 +26,6 @@ int main(int argc, const char * argv[]) {
 	gettimeofday(&tim, NULL);
 	double t1=tim.tv_sec+(tim.tv_usec/1000000.0);
 	// ------------------------------------------
-	
-	
 
 	
 	// Read main simulation parameters from file
@@ -146,10 +144,10 @@ int main(int argc, const char * argv[]) {
 		
 		//
 		
-		vector<double> tmp = SIM.check_values_beta_IS(100);
-		displayVector(tmp);
-		tmp = SIM.check_values_beta_IS(100);
-		displayVector(tmp);
+//		vector<double> tmp = SIM.check_values_beta_IS(100);
+//		displayVector(tmp);
+//		tmp = SIM.check_values_beta_IS(100);
+//		displayVector(tmp);
 		
 		
 		// Choose if execution outputs to files
@@ -176,6 +174,19 @@ int main(int argc, const char * argv[]) {
 		// DEBUG
 			cout <<endl <<" GIs at time "<< sim_mc[0].get_GIbck_times(0)<<" :";
 			displayVector(sim_mc[0].get_GIbck_gi(0));
+			
+
+			vector<double> r = sim_mc[0].get_Reff_final_n2ndCases();
+			cout <<endl <<" 2nd cases :"<<averageElements(r);
+			displayVector(r);
+			vector<double> tr = sim_mc[0].get_Reff_final_timeAcq();
+			cout <<endl <<" Timing acq 2nd cases :";
+			displayVector(tr);
+			sim_mc[0].get_Reff_final().display();
+			
+			cout<<"RR:";
+			displayVector(sim_mc[0].get_RR());
+			
 		}
 	} //end do_singleLocation
 	
