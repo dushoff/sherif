@@ -1500,7 +1500,7 @@ void simulator::calc_RR(){
 	/// Calculate the realized reproductive number
 	
 	if (_WIW.size()>0){
-		unsigned long cases
+		unsigned long cases;
 	}
 }
 
