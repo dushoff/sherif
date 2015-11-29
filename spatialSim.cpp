@@ -29,7 +29,7 @@ spatialSim::spatialSim(unsigned int nLocations,
 	_cumMovements = 0;
 	
 	//DEBUG:
-	displayInfo();
+	//displayInfo();
 	// ===========
 }
 
@@ -86,6 +86,14 @@ void spatialSim::initialize_all_simulators(string			betaType,
 	bool singleLocation = false;
 	
 	for(int i=0; i<_nLocations; i++){
+		
+		// DEBUG
+		cout << "DEBUG:" << filename_beta_timedep<<endl;
+		displayVector(overwrite_beta_timedep);
+		
+		// =====
+		
+		int location = i;
 		_simulator[i] = initialize_simulation(betaType,
 											  beta_IS[i], beta_FS[i], beta_IwS[i],
 											  beta_ISw[i], beta_FSw[i], beta_IwSw[i],
@@ -107,6 +115,7 @@ void spatialSim::initialize_all_simulators(string			betaType,
 											  nE, nI, nH, nF,
 											  GIbck_sampleTime,
 											  singleLocation,
+											  location,
 											  firstID);
 		firstID += _popLocations[i];
 		
@@ -114,7 +123,6 @@ void spatialSim::initialize_all_simulators(string			betaType,
 		//_simulator[i].displayPopulation(true);
 		// =====
 	}
-	
 }
 
 

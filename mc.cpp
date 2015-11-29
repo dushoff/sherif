@@ -43,6 +43,7 @@ simulator initialize_simulation(string	betaType,
 								unsigned int nF,
 								double GIbck_sampleTime,
 								bool singleLocation,
+								int location,
 								unsigned long firstID
 								){
 	
@@ -97,11 +98,16 @@ simulator initialize_simulation(string	betaType,
 				  singleLocation);
 	
 	// Set the time dependence of betas (contact rates):
-	SIM.readfile_beta_timedep(filename_beta_timedep);
+	SIM.readfile_beta_timedep(filename_beta_timedep,location);
 	
 	// Overwrite values if requested (typically when calibrating):
-	SIM.overwrite_beta_timedep(overwrite_beta_timedep, overwrite_value);
 	
+	// DEBUG
+	displayVector(overwrite_beta_timedep);
+	// -------
+	SIM.overwrite_beta_timedep(overwrite_beta_timedep,
+							   overwrite_value,
+							   location);
 	
 	return SIM;
 }

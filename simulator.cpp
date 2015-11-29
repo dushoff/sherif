@@ -129,7 +129,7 @@ void simulator::clear_beta_timedep(){
 	_beta_FS_newval.clear();
 }
 
-void simulator::readfile_beta_timedep(string filename){
+void simulator::readfile_beta_timedep(string filename, int location){
 	
 	/// Read files where values of time-dependent parameters
 	/// for betas are specified.
@@ -165,7 +165,7 @@ void simulator::readfile_beta_timedep(string filename){
 	stopif(n != tstart.size(),"file "+filename+ " not well defined");
 	stopif(n != tend.size(),"file "+filename+ " not well defined");
 	
-	// make sure the time-dependent vactors are cleared:
+	// make sure the time-dependent vectors are cleared:
 	clear_beta_timedep();
 	
 	// assign values from the file:
@@ -173,6 +173,22 @@ void simulator::readfile_beta_timedep(string filename){
 		
 		bool prm_known = false;
 		
+		// Special treatment for spatial model:
+		if(location>=0){
+			// Check if it's a vector parameter
+			string vec_id = "_vec";
+			std::size_t vecpos = prmName[i].find(vec_id);
+			string vec_elem ;
+			if (vecpos!=std::string::npos) {
+				std::size_t L = prmName[i].length();
+				vec_elem = prmName[i].substr(vecpos+vec_id.length());
+			}
+			// if location matches, then change values:
+			int loc =  stoi(vec_elem);
+			if(loc==location) prmName[i] = prmName[i].substr(0,vecpos);
+			if(loc!=location) prmName[i] = "location_dont_match";
+		}
+
 		if(prmName[i]=="beta_IS"){
 			_beta_IS_tstart.push_back(tstart[i]);
 			_beta_IS_tend.push_back(tend[i]);
@@ -186,13 +202,19 @@ void simulator::readfile_beta_timedep(string filename){
 			_beta_FS_newval.push_back(newval[i]);
 			prm_known = true;
 		}
+		if(prmName[i]=="location_dont_match"){
+			// do nothing
+			prm_known = true;
+		}
+		
 		stopif(!prm_known,"Parameter name "+prmName[i]+" unknown when time dependence defined.");
 	}
 }
 
 
 void simulator::overwrite_beta_timedep(vector<string> paramName,
-									   vector<double> overwval){
+									   vector<double> overwval,
+									   int location){
 	/// Overwrites whatever was read in the file
 	/// defining the time-dependent parameters
 	/// in function 'readfile_beta_timedep()'.
@@ -205,7 +227,7 @@ void simulator::overwrite_beta_timedep(vector<string> paramName,
 	for (unsigned long k=0; k<n; k++) {
 		
 		// Extracts substrings to determine
-		// which parameter, time-dependent variable ar affected:
+		// which parameter, time-dependent variable are affected:
 
 		string x = paramName[k];
 		string us = "_";
@@ -220,14 +242,46 @@ void simulator::overwrite_beta_timedep(vector<string> paramName,
 			i++;
 		}
 		
-		string prm_name = x.substr(0,pos[1]);
-		string timedep_var = x.substr(pos[1]+1,pos[2]-pos[1]-1);
-		string vec = x.substr(pos[2]+1,x.length()-pos[2]);
-		unsigned long pos_elem = stoi(vec.substr(3,string::npos));
+		// Check if it's a vector parameter:
+		//
+		std::size_t findvec = x.find("_vec");
+		std::size_t findvec2 = x.rfind("_vec");
+		
+		bool is_vec_param = (findvec<findvec2);
+		
+		// extract relevant substrings:
+		string prm_name = "";
+		string timedep_var = "";
+		string vec = "";
+		unsigned long pos_elem = 0;
+		int prm_elem = -1;
+		
+		if(!is_vec_param){
+			prm_name = x.substr(0,pos[1]);
+			timedep_var = x.substr(pos[1]+1,pos[2]-pos[1]-1);
+			vec = x.substr(pos[2]+1,x.length()-pos[2]);
+			pos_elem = stoi(vec.substr(3,string::npos));
+		}
+		
+		if(is_vec_param){
+			prm_name = x.substr(0,pos[1]);
+			string tmp = x.substr(pos[1]+1,pos[2]-pos[1]-1);
+			prm_elem = stoi(tmp.substr(3,string::npos));
+			
+			timedep_var = x.substr(pos[2]+1,pos[3]-pos[2]-1);
+			vec = x.substr(pos[3]+1,x.length()-pos[3]);
+			pos_elem = stoi(vec.substr(3,string::npos));
+			
+			if(prm_elem!=location) prm_name="location_dont_match";
+		}
 
+		
 		// Now that the parameter to be overwritten
 		// is identified, overwrites with the new value:
 		bool isKnown = false;
+		
+		
+		
 		
 		if(prm_name=="beta_IS"){
 			if (timedep_var=="tstart") {
@@ -259,10 +313,12 @@ void simulator::overwrite_beta_timedep(vector<string> paramName,
 			}
 		}
 		
+		if(prm_name=="location_dont_match"){
+			// do nothing
+			isKnown = true;
+		}
 		stopif(!isKnown, "Time-dependent parameter to overwrite is unknown:"+prm_name+timedep_var);
 	}
-	
-	
 }
 
 

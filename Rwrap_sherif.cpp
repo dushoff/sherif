@@ -81,6 +81,7 @@ List rcpp_sherif(List paramsSimul, List paramsModel) {
 	// Explictly confirms it's a single location:
 	// this will speed-up the execution.
 	bool singleLocation = true;
+	int location = -1; // must be <0, used only in spatial model
 	
 	simulator SIM = initialize_simulation(betaType,
 										  beta_IS,
@@ -111,7 +112,8 @@ List rcpp_sherif(List paramsSimul, List paramsModel) {
 										  popSize,
 										  nE, nI, nH, nF,
 										  timeIdxGI,
-										  singleLocation);
+										  singleLocation,
+										  location);
 	
 	// DEBUG ===
 //	cout << " D E B U G =====" << endl;
@@ -265,12 +267,12 @@ List rcpp_sherif_spatial(List paramsSimul,
 	
 	spSim.initialize_all_simulators(betaType,
 									beta_IS,
-							  beta_FS,
-							  beta_IwS,
-							  beta_ISw,
-							  beta_FSw,
-							  beta_IwSw,
-							  beta_HSw,
+									beta_FS,
+									beta_IwS,
+									beta_ISw,
+									beta_FSw,
+									beta_IwSw,
+									beta_HSw,
 									
 									betaTimedep,
 									overwrite_beta,

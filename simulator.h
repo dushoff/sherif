@@ -345,9 +345,11 @@ public:
 							 vector<double> beta_IS_tend,
 							 vector<double> beta_IS_newval);
 	void	clear_beta_timedep();
-	void	readfile_beta_timedep(string filename);
+	void	readfile_beta_timedep(string filename,
+								  int location);
 	void	overwrite_beta_timedep(vector<string> paramName,
-								   vector<double> newval);
+								   vector<double> newval,
+								   int location);
 
 	vector<double> check_values_beta_IS(double horizon);
 	vector<double> check_values_beta_ISw(double horizon);

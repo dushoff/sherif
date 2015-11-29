@@ -81,6 +81,16 @@ int main(int argc, const char * argv[]) {
 	overw_val.push_back(15);
 	overw_val.push_back(0.0777);
 	
+	// Overwriting time-dependent beta parameters:
+	// (Spatial model)
+	vector<string> overw_prm_spatial;
+	overw_prm_spatial.push_back("beta_IS_vec1_tstart_vec0");
+	overw_prm_spatial.push_back("beta_IS_vec1_newval_vec1");
+	vector<double> overw_val_spatial;
+	overw_val_spatial.push_back(15);
+	overw_val_spatial.push_back(0.0777);
+	
+	
 	// Simulation parameters
 	
 	double horizon				= getParameterFromFile("horizon", fileparam_simul);
@@ -98,8 +108,8 @@ int main(int argc, const char * argv[]) {
 	
 	int jobnum = 1;
 	
-	bool do_singleLocation = true;
-	bool do_multiLocation = false;
+	bool do_singleLocation = false;
+	bool do_multiLocation = true;
 	
 	
 	if(do_singleLocation){
@@ -108,6 +118,7 @@ int main(int argc, const char * argv[]) {
 		
 		bool singleLocation = true;
 		unsigned long firstID = 0;
+		int location = -1;
 		
 		simulator SIM = initialize_simulation(betaType,
 											  beta_IS,
@@ -139,6 +150,7 @@ int main(int argc, const char * argv[]) {
 											  nE, nI, nH, nF,
 											  GIbck_sampleTime,
 											  singleLocation,
+											  location,
 											  firstID);
 		
 		
@@ -193,7 +205,8 @@ int main(int argc, const char * argv[]) {
 	
 	if(do_multiLocation){
 		
-		string file_beta_timedep = "beta_IS_timedep.csv";
+		string file_beta_timedep = "beta_IS_timedep_spatial.csv";
+		fname_beta_timedep = "beta_IS_timedep_spatial.csv"; // <- FIX THIS
 		
 		// ==== SPATIAL SIMULATION ====
 		
@@ -233,8 +246,8 @@ int main(int argc, const char * argv[]) {
 										vbeta_HSw,
 										
 										fname_beta_timedep,
-										overw_prm,
-										overw_val,
+										overw_prm_spatial,
+										overw_val_spatial,
 										
 										latent_mean,
 										infectious_mean_H,
@@ -271,6 +284,11 @@ int main(int argc, const char * argv[]) {
 		
 		// DEBUG
 		
+//		beta_IS_vec1,10,18,0.10
+//		beta_IS_vec1,39,42,0.08
+//		beta_FS_vec0,15,17,0.333
+//		beta_IS_vec1,66,68,0.666
+		
 		for(int i=0;i<spSim_mc.size();i++)
 		{
 			//		cout<<"First time case MC"<<i<<":";
@@ -282,6 +300,12 @@ int main(int argc, const char * argv[]) {
 			for(int l=0; l<nLocation; l++){
 				cout <<endl<<"loc="<< l <<" GIs at time "<< spSim_mc[i].get_simulator(l).get_GIbck_times(0)<<" :";
 				displayVector(spSim_mc[i].get_simulator(l).get_GIbck_gi(0));
+				for(double t=0; t<100;t++){
+					cout << "beta_IS_"<<l<<" @ "<<t<<" : "<<spSim_mc[i].get_simulator(l).get_beta_IS_fct(t)<<endl;
+				}
+				for(double t=0; t<100;t++){
+					cout << "beta_FS_"<<l<<" @ "<<t<<" : "<<spSim_mc[i].get_simulator(l).get_beta_FS_fct(t)<<endl;
+				}
 			}
 		}
 		

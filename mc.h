@@ -46,6 +46,7 @@ simulator initialize_simulation(string	betaType,
 								unsigned int nF,
 								double GIbck_sampleTime,
 								bool singleLocation,
+								int location,
 								unsigned long firstID=0
 								);
 
